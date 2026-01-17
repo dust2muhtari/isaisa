@@ -25,31 +25,57 @@
   <div id="books-container" class="books-grid"></div>
 </main>
 
-<!-- Modal -->
-<div id="book-modal" class="modal hidden">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeBookModal()">×</button>
-
-    <h3 id="modal-title"></h3>
-    <p id="modal-body"></p>
-
-    <hr style="opacity:0.3; margin:1.5rem 0;">
-
-    <h4>Yorumlar</h4>
-    <div id="comment-list" class="comment-list"></div>
-
-    <form id="comment-form" onsubmit="submitComment(event)" class="comment-form">
-      <input type="text" id="comment-name" placeholder="Adınız" required />
-      <textarea id="comment-text" placeholder="Yorumunuz" rows="3" required></textarea>
-      <button type="submit" class="btn-primary">Gönder</button>
-    </form>
-  </div>
-</div>
-
 <footer class="site-footer">
   <p>© <span id="year"></span> M. Furkan</p>
 </footer>
 
-<script src="assets/script.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+    authDomain: "isahalis.firebaseapp.com",
+    projectId: "isahalis",
+    storageBucket: "isahalis.firebasestorage.app",
+    messagingSenderId: "33060832531",
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
+    measurementId: "G-2N25T885EH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 📚 Kitapları yükle
+  async function loadBooks() {
+    const container = document.getElementById("books-container");
+    container.innerHTML = "<p>Yükleniyor...</p>";
+
+    const snap = await getDocs(collection(db, "books"));
+    container.innerHTML = "";
+
+    snap.forEach((docItem) => {
+      const b = docItem.data();
+
+      const div = document.createElement("div");
+      div.className = "book-card";
+      div.innerHTML = `
+        <img src="${b.cover}" class="book-cover">
+        <h3>${b.title}</h3>
+        <p>${b.desc.substring(0, 80)}...</p>
+        <a href="book.html?id=${docItem.id}" class="btn-secondary">Detayları Gör</a>
+      `;
+
+      container.appendChild(div);
+    });
+  }
+
+  loadBooks();
+</script>
+
 </body>
 </html>
