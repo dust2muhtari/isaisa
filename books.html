@@ -22,6 +22,19 @@
   <h1>Kitaplarım</h1>
   <p>Bu sayfada yayımladığım tüm kitaplarımı bulabilirsiniz.</p>
 
+  <div style="margin-bottom:20px;">
+    <label><strong>Kategori Filtrele:</strong></label>
+    <select id="categoryFilter">
+      <option value="all">Tümü</option>
+      <option value="Roman">Roman</option>
+      <option value="Deneme">Deneme</option>
+      <option value="Korku">Korku</option>
+      <option value="Bilim Kurgu">Bilim Kurgu</option>
+      <option value="Fantastik">Fantastik</option>
+      <option value="Şiir">Şiir</option>
+    </select>
+  </div>
+
   <div id="books-container" class="books-grid"></div>
 </main>
 
@@ -50,29 +63,54 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 📚 Kitapları yükle
+  let allBooks = [];
+
   async function loadBooks() {
     const container = document.getElementById("books-container");
     container.innerHTML = "<p>Yükleniyor...</p>";
 
     const snap = await getDocs(collection(db, "books"));
-    container.innerHTML = "";
+    allBooks = [];
 
     snap.forEach((docItem) => {
-      const b = docItem.data();
+      allBooks.push({
+        id: docItem.id,
+        ...docItem.data()
+      });
+    });
 
+    renderBooks("all");
+  }
+
+  function renderBooks(category) {
+    const container = document.getElementById("books-container");
+    container.innerHTML = "";
+
+    const filtered = category === "all"
+      ? allBooks
+      : allBooks.filter(b => b.category === category);
+
+    filtered.forEach((b) => {
       const div = document.createElement("div");
       div.className = "book-card";
       div.innerHTML = `
         <img src="${b.cover}" class="book-cover">
         <h3>${b.title}</h3>
+        <p><strong>${b.category}</strong></p>
         <p>${b.desc.substring(0, 80)}...</p>
-        <a href="book.html?id=${docItem.id}" class="btn-secondary">Detayları Gör</a>
+        <a href="book.html?id=${b.id}" class="btn-secondary">Detayları Gör</a>
       `;
-
       container.appendChild(div);
     });
+
+    if (filtered.length === 0) {
+      container.innerHTML = "<p>Bu kategoride kitap bulunmuyor.</p>";
+    }
   }
+
+  document.getElementById("categoryFilter").addEventListener("change", (e) => {
+    renderBooks(e.target.value);
+  });
 
   loadBooks();
 </script>
