@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>M. Furkan | Ana Sayfa</title>
+  <title>Ana Sayfa | M. Furkan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
 </head>
@@ -10,68 +10,93 @@
 
 <header class="site-header">
   <div class="logo">M. Furkan</div>
-  <nav class="nav">
-    <a href="index.html">Ana Sayfa</a>
-    <a href="books.html">Kitaplarım</a>
-    <a href="about.html">Hakkımda</a>
-    <a href="contact.html">İletişim</a>
-    <a href="login.html" class="btn-secondary">Giriş</a>
+  <nav class="nav" id="nav-menu">
+    <!-- Menü elemanları JS ile doldurulacak -->
   </nav>
 </header>
 
-<main>
-
-  <!-- HERO -->
-  <section id="hero" class="hero">
-    <div class="hero-content">
-      <h1>Kelimelerin Yolculuğuna Hoş Geldiniz</h1>
-      <p>Bu site, yıllardır zihnimde büyüyen hikâyelerin buluşma noktasıdır.</p>
-      <a href="books.html" class="btn-primary">Kitaplarımı Keşfet</a>
-    </div>
-  </section>
-
-  <!-- HAKKIMDA -->
-  <section id="about" class="section section-alt">
-    <h2>Hakkımda</h2>
-    <div class="about-layout">
-      <div>
-        <p>Yazmak benim için bir yolculuktur.</p>
-        <p>Bu sitede yer alan her kitap farklı bir dönemin izlerini taşır.</p>
-      </div>
-      <div class="about-box">
-        <p><strong>İsim:</strong> M. Furkan</p>
-        <p><strong>Tür:</strong> Kurgu, deneme</p>
-        <p><strong>Dil:</strong> Türkçe</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- İLETİŞİM -->
-  <section id="contact" class="section">
-    <h2>İletişim</h2>
-    <form class="contact-form" onsubmit="handleContactSubmit(event)">
-      <div class="form-group">
-        <label>Adınız</label>
-        <input type="text" id="name" required />
-      </div>
-      <div class="form-group">
-        <label>E-posta</label>
-        <input type="email" id="email" required />
-      </div>
-      <div class="form-group">
-        <label>Mesaj</label>
-        <textarea id="message" rows="4" required></textarea>
-      </div>
-      <button type="submit" class="btn-primary">Gönder</button>
-    </form>
-  </section>
-
+<main class="section">
+  <h1>Hoş Geldiniz</h1>
+  <p>Bu site M. Furkan’ın kitaplarını, yazılarını ve projelerini içerir.</p>
 </main>
 
 <footer class="site-footer">
-  <p>© <span id="year"></span> M. Furkan – Tüm hakları saklıdır.</p>
+  <p>© <span id="year"></span> M. Furkan</p>
 </footer>
 
-<script src="assets/script.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    doc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+    authDomain: "isahalis.firebaseapp.com",
+    projectId: "isahalis",
+    storageBucket: "isahalis.firebasestorage.app",
+    messagingSenderId: "33060832531",
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
+    measurementId: "G-2N25T885EH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const nav = document.getElementById("nav-menu");
+
+  // 🔥 Kullanıcı giriş kontrolü
+  onAuthStateChanged(auth, async (user) => {
+    nav.innerHTML = ""; // Menü temizle
+
+    // Herkese görünen menü
+    nav.innerHTML += `
+      <a href="index.html">Ana Sayfa</a>
+      <a href="books.html">Kitaplarım</a>
+      <a href="about.html">Hakkımda</a>
+      <a href="contact.html">İletişim</a>
+    `;
+
+    if (user) {
+      // Kullanıcı belgesini çek
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      const role = snap.exists() ? snap.data().role : "user";
+
+      // Profil butonu
+      nav.innerHTML += `<a href="profile.html">Profilim</a>`;
+
+      // Eğer editor ise ek menüler
+      if (role === "editor") {
+        nav.innerHTML += `<a href="editor.html">Editor Paneli</a>`;
+        nav.innerHTML += `<a href="admin.html">Admin Paneli</a>`;
+      }
+
+      // Çıkış butonu
+      nav.innerHTML += `<button onclick="logout()" class="btn-secondary">Çıkış Yap</button>`;
+
+    } else {
+      // Giriş yapmamış kullanıcı
+      nav.innerHTML += `<a href="login.html">Giriş Yap</a>`;
+    }
+  });
+
+  // Çıkış fonksiyonu
+  window.logout = function () {
+    signOut(auth).then(() => {
+      window.location.href = "index.html";
+    });
+  };
+</script>
+
 </body>
 </html>
