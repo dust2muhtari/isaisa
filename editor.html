@@ -85,12 +85,14 @@
     const desc = document.getElementById("bookDesc").value;
     const fullText = document.getElementById("bookFullText").value;
     const cover = document.getElementById("bookCover").value;
+    const category = document.getElementById("bookCategory").value;
 
     await addDoc(collection(db, "books"), {
       title,
       desc,
       fullText,
       cover,
+      category,
       createdAt: Date.now()
     });
 
@@ -115,6 +117,7 @@
       div.innerHTML = `
         <img src="${b.cover}" class="book-cover">
         <h3>${b.title}</h3>
+        <p><strong>Kategori:</strong> ${b.category}</p>
         <p>${b.desc}</p>
         <button class="btn-secondary" onclick="deleteBook('${docItem.id}')">Sil</button>
       `;
@@ -158,6 +161,18 @@
     <div class="form-group">
       <label>Kapak Görseli (URL)</label>
       <input type="text" id="bookCover" placeholder="https://..." />
+    </div>
+
+    <div class="form-group">
+      <label>Kategori</label>
+      <select id="bookCategory" required>
+        <option value="Roman">Roman</option>
+        <option value="Deneme">Deneme</option>
+        <option value="Korku">Korku</option>
+        <option value="Bilim Kurgu">Bilim Kurgu</option>
+        <option value="Fantastik">Fantastik</option>
+        <option value="Şiir">Şiir</option>
+      </select>
     </div>
 
     <button type="submit" class="btn-primary">Kaydet</button>
