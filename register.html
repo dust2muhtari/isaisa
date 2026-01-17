@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kayıt Ol</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body class="login-body">
+
+<div class="login-container">
+  <h2>Yeni Hesap Oluştur</h2>
+
+  <form onsubmit="event.preventDefault(); registerUser(email.value, password.value)">
+    <div class="form-group">
+      <label>E‑posta</label>
+      <input type="email" id="email" required />
+    </div>
+
+    <div class="form-group">
+      <label>Şifre</label>
+      <input type="password" id="password" required />
+    </div>
+
+    <button type="submit" class="btn-primary">Kayıt Ol</button>
+  </form>
+
+  <p id="register-error" class="error-msg"></p>
+
+  <p style="margin-top:15px;">
+    Zaten hesabın var mı? <a href="login.html">Giriş Yap</a>
+  </p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } 
+    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getFirestore, setDoc, doc } 
+    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+    authDomain: "isahalis.firebaseapp.com",
+    projectId: "isahalis",
+    storageBucket: "isahalis.firebasestorage.app",
+    messagingSenderId: "33060832531",
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
+    measurementId: "G-2N25T885EH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  window.registerUser = async function(email, password) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        createdAt: Date.now()
+      });
+
+      alert("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.");
+      window.location.href = "login.html";
+
+    } catch (error) {
+      document.getElementById("register-error").textContent =
+        "Kayıt hatası: " + error.message;
+    }
+  };
+</script>
+
+</body>
+</html>
