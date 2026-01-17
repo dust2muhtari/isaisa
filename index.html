@@ -2,210 +2,27 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>İsa Halis | Ruhsal Yolculuk</title>
+  <title>Ana Sayfa | M. Furkan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <style>
-    body {
-      margin: 0;
-      background: #0D1B2A;
-      color: #F2F2F2;
-      font-family: "Georgia", serif;
-    }
-
-    /* HEADER */
-    .header {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      padding: 20px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
-    }
-
-    .logo {
-      font-size: 26px;
-      font-weight: bold;
-      color: #D4A373;
-    }
-
-    .nav a, .nav button {
-      color: #F2F2F2;
-      margin-left: 20px;
-      text-decoration: none;
-      font-size: 16px;
-      transition: 0.3s;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .nav a:hover, .nav button:hover {
-      color: #D4A373;
-    }
-
-    /* BANNER */
-    .banner {
-      height: 420px;
-      background: url('assets/banner-aurora.jpg') center/cover no-repeat;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      text-align: center;
-      padding-top: 80px;
-    }
-
-    .banner h1 {
-      font-size: 60px;
-      color: #D4A373;
-      margin-bottom: 10px;
-      letter-spacing: 2px;
-    }
-
-    .banner .subtitle {
-      font-size: 22px;
-      opacity: 0.9;
-    }
-
-    .banner .tagline {
-      font-size: 18px;
-      opacity: 0.8;
-      margin-top: 5px;
-      font-style: italic;
-    }
-
-    /* CATEGORY BAR */
-    .category-bar {
-      background: rgba(255,255,255,0.05);
-      padding: 15px 0;
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .category-bar a {
-      margin: 0 15px;
-      color: #D4A373;
-      text-decoration: none;
-      font-size: 17px;
-      transition: 0.3s;
-    }
-
-    .category-bar a:hover {
-      color: #ffffff;
-    }
-
-    /* QUOTE */
-    .quote-box {
-      margin: 40px auto;
-      padding: 20px;
-      max-width: 700px;
-      background: rgba(255,255,255,0.06);
-      border-left: 4px solid #D4A373;
-      font-style: italic;
-      font-size: 20px;
-      border-radius: 6px;
-    }
-
-    /* CONTENT GRID */
-    .content-section {
-      max-width: 1100px;
-      margin: 50px auto;
-      padding: 0 20px;
-    }
-
-    .content-title {
-      font-size: 28px;
-      margin-bottom: 20px;
-      color: #D4A373;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 25px;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.05);
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.08);
-      transition: 0.3s;
-    }
-
-    .card:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
-    .card img {
-      width: 100%;
-      border-radius: 6px;
-      margin-bottom: 10px;
-    }
-
-    .card h3 {
-      margin: 5px 0;
-      font-size: 20px;
-      color: #D4A373;
-    }
-
-    .card p {
-      font-size: 15px;
-      opacity: 0.9;
-    }
-
-    /* FOOTER */
-    .footer {
-      text-align: center;
-      padding: 20px;
-      margin-top: 60px;
-      background: rgba(0,0,0,0.3);
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-  </style>
+  <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">İsa Halis</div>
-  <nav class="nav" id="nav-menu"></nav>
-</div>
+<header class="site-header">
+  <div class="logo">M. Furkan</div>
+  <nav class="nav" id="nav-menu">
+    <!-- Menü elemanları JS ile doldurulacak -->
+  </nav>
+</header>
 
-<!-- BANNER -->
-<section class="banner">
-  <h1>İsa Halis</h1>
-  <div class="subtitle">Kalbinin yükünü hafifleten kelimeler</div>
-  <div class="tagline">Ruhun karanlık gecelerinde bir ışık arayanlara…</div>
-</section>
+<main class="section">
+  <h1>Hoş Geldiniz</h1>
+  <p>Bu site M. Furkan’ın kitaplarını, yazılarını ve projelerini içerir.</p>
+</main>
 
-<!-- CATEGORY BAR -->
-<div class="category-bar">
-  <a href="books.html?cat=insan">İnsan Fabrika Ayarı</a>
-  <a href="books.html?cat=tazelenme">Ruhsal Tazelenme</a>
-  <a href="books.html?cat=anlama">Hayatı Tekrar Anlama</a>
-  <a href="books.html?cat=aforizma">Aforizmalar</a>
-  <a href="books.html?cat=diger">Diğer</a>
-</div>
-
-<!-- QUOTE -->
-<div class="quote-box" id="quote-box">Yükleniyor...</div>
-
-<!-- CONTENT SECTION -->
-<section class="content-section">
-  <div class="content-title">Güncel İçerikler</div>
-  <div class="grid" id="content-grid">
-    <p>Yükleniyor...</p>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<div class="footer">
-  © <span id="year"></span> İsa Halis
-</div>
+<footer class="site-footer">
+  <p>© <span id="year"></span> M. Furkan</p>
+</footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -218,12 +35,7 @@
   import {
     getFirestore,
     doc,
-    getDoc,
-    collection,
-    getDocs,
-    query,
-    orderBy,
-    limit
+    getDoc
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -242,85 +54,48 @@
 
   const nav = document.getElementById("nav-menu");
 
-  /* -------------------------
-     MENÜ GİRİŞ KONTROLÜ
-  ------------------------- */
+  // 🔥 Kullanıcı giriş kontrolü
   onAuthStateChanged(auth, async (user) => {
-    nav.innerHTML = `
+    nav.innerHTML = ""; // Menü temizle
+
+    // Herkese görünen menü
+    nav.innerHTML += `
       <a href="index.html">Ana Sayfa</a>
-      <a href="books.html">Kitaplar</a>
+      <a href="books.html">Kitaplarım</a>
       <a href="about.html">Hakkımda</a>
       <a href="contact.html">İletişim</a>
     `;
 
     if (user) {
+      // Kullanıcı belgesini çek
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
       const role = snap.exists() ? snap.data().role : "user";
 
+      // Profil butonu
       nav.innerHTML += `<a href="profile.html">Profilim</a>`;
 
+      // Eğer editor ise ek menüler
       if (role === "editor") {
         nav.innerHTML += `<a href="editor.html">Editor Paneli</a>`;
         nav.innerHTML += `<a href="admin.html">Admin Paneli</a>`;
       }
 
+      // Çıkış butonu
       nav.innerHTML += `<button onclick="logout()" class="btn-secondary">Çıkış Yap</button>`;
+
     } else {
+      // Giriş yapmamış kullanıcı
       nav.innerHTML += `<a href="login.html">Giriş Yap</a>`;
     }
   });
 
+  // Çıkış fonksiyonu
   window.logout = function () {
-    signOut(auth).then(() => window.location.href = "index.html");
-  };
-
-  /* -------------------------
-     DİNAMİK VECİZ SÖZ
-  ------------------------- */
-  async function loadQuote() {
-    const snap = await getDocs(collection(db, "quotes"));
-    const quotes = snap.docs.map(d => d.data().text);
-
-    if (quotes.length === 0) {
-      document.getElementById("quote-box").textContent = "Henüz söz eklenmemiş.";
-      return;
-    }
-
-    const random = quotes[Math.floor(Math.random() * quotes.length)];
-    document.getElementById("quote-box").textContent = random;
-  }
-
-  loadQuote();
-
-  /* -------------------------
-     GÜNCEL İÇERİKLER
-  ------------------------- */
-  async function loadContent() {
-    const grid = document.getElementById("content-grid");
-    grid.innerHTML = "";
-
-    const q = query(collection(db, "books"), orderBy("createdAt", "desc"), limit(4));
-    const snap = await getDocs(q);
-
-    snap.forEach(docItem => {
-      const b = docItem.data();
-
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
-        <img src="${b.cover}">
-        <h3>${b.title}</h3>
-        <p>${b.desc.substring(0, 120)}...</p>
-        <p style="opacity:0.6;font-size:14px;">${new Date(b.createdAt).toLocaleDateString()}</p>
-      `;
-      div.onclick = () => window.location.href = "book.html?id=" + docItem.id;
-
-      grid.appendChild(div);
+    signOut(auth).then(() => {
+      window.location.href = "index.html";
     });
-  }
-
-  loadContent();
+  };
 </script>
 
 </body>
