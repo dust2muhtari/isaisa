@@ -8,6 +8,42 @@
 </head>
 <body>
 
+<!-- 🔐 Firebase Auth Kontrolü -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } 
+    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+    authDomain: "isahalis.firebaseapp.com",
+    projectId: "isahalis",
+    storageBucket: "isahalis.firebasestorage.app",
+    messagingSenderId: "33060832531",
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
+    measurementId: "G-2N25T885EH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Kullanıcı giriş yapmamışsa login'e at
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      console.log("Giriş yapan:", user.email);
+    }
+  });
+
+  // Çıkış
+  window.logout = function() {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    });
+  };
+</script>
+
 <header class="site-header">
   <div class="logo">Editor Paneli</div>
   <nav class="nav">
@@ -41,55 +77,47 @@
   <div id="bookList"></div>
 </main>
 
+<!-- 📚 Kitap Yönetimi -->
 <script>
-if (localStorage.getItem("loggedIn") !== "true") {
-  window.location.href = "login.html";
-}
+  const books = JSON.parse(localStorage.getItem("books") || "[]");
 
-const books = JSON.parse(localStorage.getItem("books") || "[]");
+  function renderBooks() {
+    const list = document.getElementById("bookList");
+    list.innerHTML = "";
 
-function renderBooks() {
-  const list = document.getElementById("bookList");
-  list.innerHTML = "";
+    books.forEach((b, i) => {
+      const div = document.createElement("div");
+      div.className = "book-card";
+      div.innerHTML = `
+        <h3>${b.title}</h3>
+        <p>${b.desc}</p>
+        <button class="btn-secondary" onclick="deleteBook(${i})">Sil</button>
+      `;
+      list.appendChild(div);
+    });
+  }
 
-  books.forEach((b, i) => {
-    const div = document.createElement("div");
-    div.className = "book-card";
-    div.innerHTML = `
-      <h3>${b.title}</h3>
-      <p>${b.desc}</p>
-      <button class="btn-secondary" onclick="deleteBook(${i})">Sil</button>
-    `;
-    list.appendChild(div);
+  document.getElementById("bookForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    books.push({
+      title: bookTitle.value,
+      desc: bookDesc.value,
+      fullText: bookFullText.value
+    });
+
+    localStorage.setItem("books", JSON.stringify(books));
+    renderBooks();
+    e.target.reset();
   });
-}
 
-document.getElementById("bookForm").addEventListener("submit", (e) => {
-  e.preventDefault();
+  function deleteBook(i) {
+    books.splice(i, 1);
+    localStorage.setItem("books", JSON.stringify(books));
+    renderBooks();
+  }
 
-  books.push({
-    title: bookTitle.value,
-    desc: bookDesc.value,
-    fullText: bookFullText.value
-  });
-
-  localStorage.setItem("books", JSON.stringify(books));
   renderBooks();
-  e.target.reset();
-});
-
-function deleteBook(i) {
-  books.splice(i, 1);
-  localStorage.setItem("books", JSON.stringify(books));
-  renderBooks();
-}
-
-function logout() {
-  localStorage.removeItem("loggedIn");
-  window.location.href = "login.html";
-}
-
-renderBooks();
 </script>
 
 </body>
