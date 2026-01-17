@@ -9,7 +9,7 @@
 <body class="login-body">
 
 <div class="login-container">
-  <h2>Giriş Yap</h2>
+  <h2>Yönetici Girişi</h2>
 
   <form onsubmit="event.preventDefault(); loginUser(email.value, password.value)">
     <div class="form-group">
@@ -29,6 +29,11 @@
 
   <p style="margin-top:15px;">
     Hesabın yok mu? <a href="register.html">Kayıt Ol</a>
+  </p>
+
+  <!-- 🔥 Eklenen bölüm: Ana Sayfaya Dön -->
+  <p style="margin-top:10px;">
+    <a href="index.html" class="btn-secondary">Ana Sayfaya Dön</a>
   </p>
 </div>
 
@@ -50,18 +55,17 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
+  // 🔥 Firebase Login Fonksiyonu
   window.loginUser = async function(email, password) {
-    const errorBox = document.getElementById("login-error");
-    errorBox.textContent = "Giriş deneniyor...";
-
     try {
-      const cred = await signInWithEmailAndPassword(auth, email, password);
-      errorBox.textContent = "Giriş başarılı: " + cred.user.email;
-      alert("Giriş başarılı, editor.html'e gidiyorum");
+      await signInWithEmailAndPassword(auth, email, password);
+
+      // Başarılı giriş → editor.html
       window.location.href = "editor.html";
+
     } catch (error) {
-      console.error(error);
-      errorBox.textContent = "Giriş hatası: " + error.code;
+      document.getElementById("login-error").textContent =
+        "Giriş hatası: " + error.message;
     }
   };
 </script>
