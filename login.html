@@ -11,10 +11,10 @@
 <div class="login-container">
   <h2>Yönetici Girişi</h2>
 
-  <form onsubmit="login(event)">
+  <form onsubmit="event.preventDefault(); loginUser(email.value, password.value)">
     <div class="form-group">
-      <label>Kullanıcı Adı</label>
-      <input type="text" id="username" required />
+      <label>E‑posta</label>
+      <input type="email" id="email" required />
     </div>
 
     <div class="form-group">
@@ -26,23 +26,28 @@
   </form>
 
   <p id="login-error" class="error-msg"></p>
+
+  <p style="margin-top:15px;">
+    Hesabın yok mu? <a href="register.html">Kayıt Ol</a>
+  </p>
 </div>
 
-<script>
-function login(e) {
-  e.preventDefault();
-  const u = username.value;
-  const p = password.value;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } 
+    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-  if (u === "admin" && p === "1234") {
-    localStorage.setItem("loggedIn", "true");
-    window.location.href = "editor.html";
-  } else {
-    document.getElementById("login-error").textContent =
-      "Hatalı kullanıcı adı veya şifre";
-  }
-}
-</script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+    authDomain: "isahalis.firebaseapp.com",
+    projectId: "isahalis",
+    storageBucket: "isahalis.firebasestorage.app",
+    messagingSenderId: "33060832531",
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
+    measurementId: "G-2N25T885EH"
+  };
 
-</body>
-</html>
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  window.loginUser = async function(email,
