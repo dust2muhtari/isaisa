@@ -10,9 +10,14 @@
 
 <style>
   body { display: none; }
+  .book-cover {
+    width: 120px;
+    height: auto;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
 </style>
 
-<!-- 🔐 Firebase Auth + Firestore -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
   import { 
@@ -97,16 +102,18 @@
   // 📖 KİTAPLARI LİSTELEME
   async function loadBooks() {
     const list = document.getElementById("bookList");
-    list.innerHTML = "";
+    list.innerHTML = "<p>Yükleniyor...</p>";
 
     const snap = await getDocs(collection(db, "books"));
+    list.innerHTML = "";
+
     snap.forEach((docItem) => {
       const b = docItem.data();
 
       const div = document.createElement("div");
       div.className = "book-card";
       div.innerHTML = `
-        <img src="${b.cover}" style="width:120px;height:auto;border-radius:6px;margin-bottom:10px;">
+        <img src="${b.cover}" class="book-cover">
         <h3>${b.title}</h3>
         <p>${b.desc}</p>
         <button class="btn-secondary" onclick="deleteBook('${docItem.id}')">Sil</button>
