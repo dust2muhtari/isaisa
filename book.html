@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kitap Detayı</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">M. Furkan</div>
+  <nav class="nav">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="books.html">Kitaplarım</a>
+    <a href="about.html">Hakkımda</a>
+    <a href="contact.html">İletişim</a>
+  </nav>
+</header>
+
+<main class="section">
+  <div id="book-content">
+    <h1 id="book-title">Yükleniyor...</h1>
+    <img id="book-cover" style="width:200px;border-radius:8px;margin:20px 0;">
+    <p id="book-desc"></p>
+    <hr style="margin:2rem 0;opacity:0.3;">
+    <h3>Kitap Tam Metni</h3>
+    <p id="book-full"></p>
+  </div>
+
+  <hr style="margin:2rem 0;opacity:0.3;">
+
+  <h3>Yorumlar</h3>
+  <div id="comment-list">Yorumlar yükleniyor...</div>
+
+  <div id="comment-box" style="margin-top:20px;">
+    <h4>Yorum Yaz</h4>
+
+    <p id="comment-login-warning" style="color:red;display:none;">
+      Yorum yazmak için giriş yapmanız gerekiyor.
+      <a href="login.html">Giriş Yap</a>
+    </p>
+
+    <form id="comment-form" onsubmit="submitComment(event)" style="display:none;">
+      <input type="text" id="comment-name" placeholder="Adınız" required />
+      <textarea id="comment-text" placeholder="Yorumunuz" rows="3" required></textarea>
+      <button type="submit" class="btn-primary">Gönder</button>
+    </form>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>© <span id="year"></span> M. Furkan</p>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    getDocs,
+    addDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+    authDomain: "isahalis.firebaseapp.com",
+    projectId: "isahalis",
+    storageBucket: "isahalis.firebasestorage.app",
+    messagingSenderId: "33060832531",
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
+    measurementId: "G-2N25T885EH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+
+  // URL'den kitap ID'sini al
+  const params = new URLSearchParams(window.location.search);
+  const bookId = params.get("id");
+
+  if (!bookId) {
+    document.getElementById("book-content").innerHTML = "<p>Kitap bulunamadı.</p>";
+  }
+
+  // 🔥 Kitap bilgilerini yükle
+  async function loadBook() {
+    const ref = doc(db, "books", bookId);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      document.getElementById("book-content").innerHTML = "<p>Kitap bulunamadı.</p>";
+      return;
+    }
+
+    const b = snap.data();
+
+    document.getElementById("book-title").textContent = b.title;
+    document.getElementById("book-cover").src = b.cover;
+    document.getElementById("book-desc").textContent = b.desc;
+    document.getElementById("book-full").textContent = b.fullText;
+  }
+
+  loadBook();
+
+  // 🔥 Yorumları yükle
+  async function loadComments() {
+    const list = document.getElementById("comment-list");
+    list.innerHTML = "";
+
+    const snap = await getDocs(collection(db, "books", bookId, "comments"));
+
+    snap.forEach((c) => {
+      const data = c.data();
+      const div = document.createElement("div");
+      div.className = "comment-item";
+      div.innerHTML = `
+        <strong>${data.name}</strong>
+        <p>${data.text}</p>
+        <small>${new Date(data.createdAt).toLocaleString()}</small>
+        <hr style="opacity:0.2;">
+      `;
+      list.appendChild(div);
+    });
+
+    if (list.innerHTML === "") {
+      list.innerHTML = "<p>Henüz yorum yok.</p>";
+    }
+  }
+
+  loadComments();
+
+  // 🔥 Kullanıcı giriş kontrolü
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+
+    if (user) {
+      document.getElementById("comment-form").style.display = "block";
+      document.getElementById("comment-login-warning").style.display = "none";
+      document.getElementById("comment-name").value = user.email.split("@")[0];
+    } else {
+      document.getElementById("comment-form").style.display = "none";
+      document.getElementById("comment-login-warning").style.display = "block";
+    }
+  });
+
+  // 🔥 Yorum gönderme
+  window.submitComment = async function (e) {
+    e.preventDefault();
+
+    if (!currentUser) return;
+
+    const name = document.getElementById("comment-name").value;
+    const text = document.getElementById("comment-text").value;
+
+    await addDoc(collection(db, "books", bookId, "comments"), {
+      name,
+      text,
+      userId: currentUser.uid,
+      createdAt: Date.now()
+    });
+
+    document.getElementById("comment-form").reset();
+    loadComments();
+  };
+</script>
+
+</body>
+</html>
