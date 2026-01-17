@@ -4,21 +4,25 @@
   <meta charset="UTF-8" />
   <title>İsa Halis | Ruhsal Yolculuk</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="assets/style.css" />
 
   <style>
     body {
       margin: 0;
-      background: linear-gradient(to bottom, #0D1B2A, #1B263B);
+      background: #0D1B2A;
       color: #F2F2F2;
       font-family: "Georgia", serif;
     }
 
     /* HEADER */
-    .site-header {
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(6px);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+    .header {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
     }
 
     .logo {
@@ -29,47 +33,74 @@
 
     .nav a, .nav button {
       color: #F2F2F2;
-      margin-left: 15px;
+      margin-left: 20px;
+      text-decoration: none;
+      font-size: 16px;
       transition: 0.3s;
+      background: none;
+      border: none;
+      cursor: pointer;
     }
 
     .nav a:hover, .nav button:hover {
       color: #D4A373;
     }
 
-    /* HERO */
-    .hero {
+    /* BANNER */
+    .banner {
+      height: 420px;
+      background: url('assets/banner-aurora.jpg') center/cover no-repeat;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       text-align: center;
-      padding: 140px 20px;
-      background: url('assets/hero-bg.jpg') center/cover no-repeat;
-      background-blend-mode: overlay;
-      background-color: rgba(0,0,0,0.55);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-top: 80px;
     }
 
-    .hero h1 {
-      font-size: 56px;
-      margin-bottom: 10px;
+    .banner h1 {
+      font-size: 60px;
       color: #D4A373;
+      margin-bottom: 10px;
       letter-spacing: 2px;
     }
 
-    .hero .subtitle {
+    .banner .subtitle {
       font-size: 22px;
       opacity: 0.9;
-      margin-bottom: 5px;
     }
 
-    .hero .tagline {
+    .banner .tagline {
       font-size: 18px;
       opacity: 0.8;
+      margin-top: 5px;
       font-style: italic;
+    }
+
+    /* CATEGORY BAR */
+    .category-bar {
+      background: rgba(255,255,255,0.05);
+      padding: 15px 0;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .category-bar a {
+      margin: 0 15px;
+      color: #D4A373;
+      text-decoration: none;
+      font-size: 17px;
+      transition: 0.3s;
+    }
+
+    .category-bar a:hover {
+      color: #ffffff;
     }
 
     /* QUOTE */
     .quote-box {
-      margin: 50px auto;
-      padding: 25px;
+      margin: 40px auto;
+      padding: 20px;
       max-width: 700px;
       background: rgba(255,255,255,0.06);
       border-left: 4px solid #D4A373;
@@ -78,74 +109,56 @@
       border-radius: 6px;
     }
 
-    /* AUTHOR SECTION */
-    .author-section {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 40px;
-      margin: 70px auto;
-      max-width: 900px;
-      padding: 20px;
+    /* CONTENT GRID */
+    .content-section {
+      max-width: 1100px;
+      margin: 50px auto;
+      padding: 0 20px;
     }
 
-    .author-photo {
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid #D4A373;
-      box-shadow: 0 0 20px rgba(212,163,115,0.4);
+    .content-title {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #D4A373;
     }
 
-    .author-text {
-      max-width: 500px;
-      font-size: 18px;
-      line-height: 1.7;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
     }
 
-    .signature {
-      margin-top: 15px;
-      width: 200px;
-      opacity: 0.85;
-    }
-
-    /* LATEST BOOK */
-    .latest-book {
-      margin: 70px auto;
-      max-width: 900px;
-      padding: 30px;
+    .card {
       background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-      text-align: center;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .latest-book img {
-      width: 200px;
+      padding: 15px;
       border-radius: 8px;
-      margin-bottom: 15px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.4);
-    }
-
-    .btn-light {
-      display: inline-block;
-      padding: 12px 24px;
-      background: #D4A373;
-      color: #1A1A1A;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-      margin-top: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
       transition: 0.3s;
     }
 
-    .btn-light:hover {
-      background: #e8b98a;
+    .card:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      margin: 5px 0;
+      font-size: 20px;
+      color: #D4A373;
+    }
+
+    .card p {
+      font-size: 15px;
+      opacity: 0.9;
     }
 
     /* FOOTER */
-    .site-footer {
+    .footer {
       text-align: center;
       padding: 20px;
       margin-top: 60px;
@@ -156,44 +169,43 @@
 </head>
 <body>
 
-<header class="site-header">
+<!-- HEADER -->
+<div class="header">
   <div class="logo">İsa Halis</div>
   <nav class="nav" id="nav-menu"></nav>
-</header>
+</div>
 
-<!-- HERO -->
-<section class="hero">
+<!-- BANNER -->
+<section class="banner">
   <h1>İsa Halis</h1>
   <div class="subtitle">Kalbinin yükünü hafifleten kelimeler</div>
   <div class="tagline">Ruhun karanlık gecelerinde bir ışık arayanlara…</div>
 </section>
 
+<!-- CATEGORY BAR -->
+<div class="category-bar">
+  <a href="books.html?cat=insan">İnsan Fabrika Ayarı</a>
+  <a href="books.html?cat=tazelenme">Ruhsal Tazelenme</a>
+  <a href="books.html?cat=anlama">Hayatı Tekrar Anlama</a>
+  <a href="books.html?cat=aforizma">Aforizmalar</a>
+  <a href="books.html?cat=diger">Diğer</a>
+</div>
+
 <!-- QUOTE -->
 <div class="quote-box" id="quote-box">Yükleniyor...</div>
 
-<!-- AUTHOR SECTION -->
-<section class="author-section">
-  <img src="assets/isa-halis.jpg" class="author-photo" id="author-photo">
-
-  <div class="author-text">
-    <p id="author-bio">
-      Ruhsal yolculuklara eşlik eden bir kalem.  
-      İnsanların karanlık dönemlerinde bir ışık olma niyetiyle yazıyorum.
-    </p>
-
-    <img src="assets/isa-signature.png" class="signature" id="author-signature">
+<!-- CONTENT SECTION -->
+<section class="content-section">
+  <div class="content-title">Güncel İçerikler</div>
+  <div class="grid" id="content-grid">
+    <p>Yükleniyor...</p>
   </div>
 </section>
 
-<!-- LATEST BOOK -->
-<section class="latest-book" id="latest-book">
-  <h2>Son Eklenen Kitap</h2>
-  <p>Yükleniyor...</p>
-</section>
-
-<footer class="site-footer">
-  <p>© <span id="year"></span> İsa Halis</p>
-</footer>
+<!-- FOOTER -->
+<div class="footer">
+  © <span id="year"></span> İsa Halis
+</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -282,29 +294,33 @@
   loadQuote();
 
   /* -------------------------
-     SON EKLENEN KİTAP
+     GÜNCEL İÇERİKLER
   ------------------------- */
-  async function loadLatestBook() {
-    const q = query(collection(db, "books"), orderBy("createdAt", "desc"), limit(1));
+  async function loadContent() {
+    const grid = document.getElementById("content-grid");
+    grid.innerHTML = "";
+
+    const q = query(collection(db, "books"), orderBy("createdAt", "desc"), limit(4));
     const snap = await getDocs(q);
 
-    if (snap.empty) {
-      document.getElementById("latest-book").innerHTML += "<p>Henüz kitap eklenmemiş.</p>";
-      return;
-    }
+    snap.forEach(docItem => {
+      const b = docItem.data();
 
-    const docItem = snap.docs[0];
-    const b = docItem.data();
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <img src="${b.cover}">
+        <h3>${b.title}</h3>
+        <p>${b.desc.substring(0, 120)}...</p>
+        <p style="opacity:0.6;font-size:14px;">${new Date(b.createdAt).toLocaleDateString()}</p>
+      `;
+      div.onclick = () => window.location.href = "book.html?id=" + docItem.id;
 
-    document.getElementById("latest-book").innerHTML = `
-      <img src="${b.cover}">
-      <h3>${b.title}</h3>
-      <p>${b.desc.substring(0, 120)}...</p>
-      <a href="book.html?id=${docItem.id}" class="btn-light">Kitabı Gör</a>
-    `;
+      grid.appendChild(div);
+    });
   }
 
-  loadLatestBook();
+  loadContent();
 </script>
 
 </body>
