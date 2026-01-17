@@ -9,7 +9,7 @@
 <body class="login-body">
 
 <div class="login-container">
-  <h2>Yönetici Girişi</h2>
+  <h2>Giriş Yap</h2>
 
   <form onsubmit="event.preventDefault(); loginUser(email.value, password.value)">
     <div class="form-group">
@@ -31,7 +31,6 @@
     Hesabın yok mu? <a href="register.html">Kayıt Ol</a>
   </p>
 
-  <!-- 🔥 Eklenen bölüm: Ana Sayfaya Dön -->
   <p style="margin-top:10px;">
     <a href="index.html" class="btn-secondary">Ana Sayfaya Dön</a>
   </p>
@@ -39,8 +38,16 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } 
-    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword 
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    doc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
@@ -54,14 +61,25 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
 
-  // 🔥 Firebase Login Fonksiyonu
+  // 🔥 GÜNCEL LOGIN FONKSİYONU (Editor / User ayrımı)
   window.loginUser = async function(email, password) {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      // Başarılı giriş → editor.html
-      window.location.href = "editor.html";
+      // Kullanıcı belgesini Firestore'dan çek
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+
+      if (snap.exists() && snap.data().role === "editor") {
+        // Editor → editor paneline
+        window.location.href = "editor.html";
+      } else {
+        // Normal kullanıcı → kitaplar sayfasına
+        window.location.href = "books.html";
+      }
 
     } catch (error) {
       document.getElementById("login-error").textContent =
