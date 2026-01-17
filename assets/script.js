@@ -1,3 +1,25 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+  authDomain: "isahalis.firebaseapp.com",
+  projectId: "isahalis",
+  storageBucket: "isahalis.firebasestorage.app",
+  messagingSenderId: "33060832531",
+  appId: "1:33060832531:web:31cdc1598686be16aa06e6",
+  measurementId: "G-2N25T885EH"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
 // Yıl
 document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -94,4 +116,5 @@ function handleContactSubmit(e) {
   e.preventDefault();
   alert("Mesajınız alındı.");
   e.target.reset();
+
 }
