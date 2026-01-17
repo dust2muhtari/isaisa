@@ -8,11 +8,28 @@
 </head>
 <body>
 
-<!-- 🔐 Firebase Auth Kontrolü -->
+<style>
+  body { display: none; }
+</style>
+
+<!-- 🔐 Firebase Auth + Firestore -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } 
-    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
@@ -26,30 +43,84 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
 
-  // Kullanıcı giriş yapmamışsa login'e at
-  onAuthStateChanged(auth, (user) => {
+  // 🔒 YETKİ KONTROLÜ
+  onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      console.log("Kullanıcı yok → login'e yönlendiriliyor");
       window.location.href = "login.html";
-    } else {
-      console.log("Giriş yapan:", user.email);
-      document.body.style.display = "block"; // Paneli görünür yap
+      return;
     }
+
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists() || snap.data().role !== "editor") {
+      alert("Bu sayfaya erişim yetkiniz yok.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    document.body.style.display = "block";
+    loadBooks();
   });
 
-  // Çıkış
-  window.logout = function() {
+  // 🔓 ÇIKIŞ
+  window.logout = function () {
     signOut(auth).then(() => {
       window.location.href = "login.html";
     });
   };
-</script>
 
-<!-- Sayfa ilk açıldığında gizli olsun -->
-<style>
-  body { display: none; }
-</style>
+  // 📚 KİTAP EKLEME
+  window.submitBook = async function (e) {
+    e.preventDefault();
+
+    const title = document.getElementById("bookTitle").value;
+    const desc = document.getElementById("bookDesc").value;
+    const fullText = document.getElementById("bookFullText").value;
+    const cover = document.getElementById("bookCover").value;
+
+    await addDoc(collection(db, "books"), {
+      title,
+      desc,
+      fullText,
+      cover,
+      createdAt: Date.now()
+    });
+
+    alert("Kitap başarıyla eklendi.");
+    e.target.reset();
+    loadBooks();
+  };
+
+  // 📖 KİTAPLARI LİSTELEME
+  async function loadBooks() {
+    const list = document.getElementById("bookList");
+    list.innerHTML = "";
+
+    const snap = await getDocs(collection(db, "books"));
+    snap.forEach((docItem) => {
+      const b = docItem.data();
+
+      const div = document.createElement("div");
+      div.className = "book-card";
+      div.innerHTML = `
+        <img src="${b.cover}" style="width:120px;height:auto;border-radius:6px;margin-bottom:10px;">
+        <h3>${b.title}</h3>
+        <p>${b.desc}</p>
+        <button class="btn-secondary" onclick="deleteBook('${docItem.id}')">Sil</button>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  // ❌ KİTAP SİLME
+  window.deleteBook = async function (id) {
+    await deleteDoc(doc(db, "books", id));
+    loadBooks();
+  };
+</script>
 
 <header class="site-header">
   <div class="logo">Editor Paneli</div>
@@ -61,7 +132,7 @@
 <main class="section">
   <h2>Kitap Ekle</h2>
 
-  <form id="bookForm" class="contact-form">
+  <form id="bookForm" class="contact-form" onsubmit="submitBook(event)">
     <div class="form-group">
       <label>Kitap Adı</label>
       <input type="text" id="bookTitle" required />
@@ -77,54 +148,17 @@
       <textarea id="bookFullText" rows="10"></textarea>
     </div>
 
+    <div class="form-group">
+      <label>Kapak Görseli (URL)</label>
+      <input type="text" id="bookCover" placeholder="https://..." />
+    </div>
+
     <button type="submit" class="btn-primary">Kaydet</button>
   </form>
 
   <h2 style="margin-top:2rem;">Mevcut Kitaplar</h2>
   <div id="bookList"></div>
 </main>
-
-<script>
-  const books = JSON.parse(localStorage.getItem("books") || "[]");
-
-  function renderBooks() {
-    const list = document.getElementById("bookList");
-    list.innerHTML = "";
-
-    books.forEach((b, i) => {
-      const div = document.createElement("div");
-      div.className = "book-card";
-      div.innerHTML = `
-        <h3>${b.title}</h3>
-        <p>${b.desc}</p>
-        <button class="btn-secondary" onclick="deleteBook(${i})">Sil</button>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  document.getElementById("bookForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    books.push({
-      title: bookTitle.value,
-      desc: bookDesc.value,
-      fullText: bookFullText.value
-    });
-
-    localStorage.setItem("books", JSON.stringify(books));
-    renderBooks();
-    e.target.reset();
-  });
-
-  function deleteBook(i) {
-    books.splice(i, 1);
-    localStorage.setItem("books", JSON.stringify(books));
-    renderBooks();
-  }
-
-  renderBooks();
-</script>
 
 </body>
 </html>
