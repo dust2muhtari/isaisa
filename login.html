@@ -55,9 +55,12 @@
     errorBox.textContent = "Giriş deneniyor...";
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      errorBox.textContent = "Giriş başarılı: " + cred.user.email;
+      alert("Giriş başarılı, editor.html'e gidiyorum");
       window.location.href = "editor.html";
     } catch (error) {
+      console.error(error);
       errorBox.textContent = "Giriş hatası: " + error.code;
     }
   };
