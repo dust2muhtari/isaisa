@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kitaplarım | M. Furkan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">M. Furkan</div>
+  <nav class="nav">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="books.html">Kitaplarım</a>
+    <a href="about.html">Hakkımda</a>
+    <a href="contact.html">İletişim</a>
+  </nav>
+</header>
+
+<main class="section">
+  <h1>Kitaplarım</h1>
+  <p>Bu sayfada yayımladığım tüm kitaplarımı bulabilirsiniz.</p>
+
+  <div id="books-container" class="books-grid"></div>
+</main>
+
+<!-- Modal -->
+<div id="book-modal" class="modal hidden">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeBookModal()">×</button>
+
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+
+    <hr style="opacity:0.3; margin:1.5rem 0;">
+
+    <h4>Yorumlar</h4>
+    <div id="comment-list" class="comment-list"></div>
+
+    <form id="comment-form" onsubmit="submitComment(event)" class="comment-form">
+      <input type="text" id="comment-name" placeholder="Adınız" required />
+      <textarea id="comment-text" placeholder="Yorumunuz" rows="3" required></textarea>
+      <button type="submit" class="btn-primary">Gönder</button>
+    </form>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>© <span id="year"></span> M. Furkan</p>
+</footer>
+
+<script src="assets/script.js"></script>
+</body>
+</html>

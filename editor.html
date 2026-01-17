@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editor Paneli</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">Editor Paneli</div>
+  <nav class="nav">
+    <button onclick="logout()" class="btn-secondary">Çıkış Yap</button>
+  </nav>
+</header>
+
+<main class="section">
+  <h2>Kitap Ekle</h2>
+
+  <form id="bookForm" class="contact-form">
+    <div class="form-group">
+      <label>Kitap Adı</label>
+      <input type="text" id="bookTitle" required />
+    </div>
+
+    <div class="form-group">
+      <label>Arka Kapak Yazısı</label>
+      <textarea id="bookDesc" rows="4" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Kitap Tam Metni</label>
+      <textarea id="bookFullText" rows="10"></textarea>
+    </div>
+
+    <button type="submit" class="btn-primary">Kaydet</button>
+  </form>
+
+  <h2 style="margin-top:2rem;">Mevcut Kitaplar</h2>
+  <div id="bookList"></div>
+</main>
+
+<script>
+if (localStorage.getItem("loggedIn") !== "true") {
+  window.location.href = "login.html";
+}
+
+const books = JSON.parse(localStorage.getItem("books") || "[]");
+
+function renderBooks() {
+  const list = document.getElementById("bookList");
+  list.innerHTML = "";
+
+  books.forEach((b, i) => {
+    const div = document.createElement("div");
+    div.className = "book-card";
+    div.innerHTML = `
+      <h3>${b.title}</h3>
+      <p>${b.desc}</p>
+      <button class="btn-secondary" onclick="deleteBook(${i})">Sil</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+document.getElementById("bookForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  books.push({
+    title: bookTitle.value,
+    desc: bookDesc.value,
+    fullText: bookFullText.value
+  });
+
+  localStorage.setItem("books", JSON.stringify(books));
+  renderBooks();
+  e.target.reset();
+});
+
+function deleteBook(i) {
+  books.splice(i, 1);
+  localStorage.setItem("books", JSON.stringify(books));
+  renderBooks();
+}
+
+function logout() {
+  localStorage.removeItem("loggedIn");
+  window.location.href = "login.html";
+}
+
+renderBooks();
+</script>
+
+</body>
+</html>
