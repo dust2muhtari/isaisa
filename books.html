@@ -72,12 +72,26 @@
     const snap = await getDocs(collection(db, "books"));
     allBooks = [];
 
-    snap.forEach((docItem) => {
+    for (const docItem of snap.docs) {
+      const book = docItem.data();
+      const commentsSnap = await getDocs(collection(db, "books", docItem.id, "comments"));
+
+      let total = 0;
+      let count = 0;
+
+      commentsSnap.forEach(c => {
+        total += c.data().rating || 0;
+        count++;
+      });
+
+      const avg = count === 0 ? "Henüz puan yok" : (total / count).toFixed(1) + " ★";
+
       allBooks.push({
         id: docItem.id,
-        ...docItem.data()
+        avgRating: avg,
+        ...book
       });
-    });
+    }
 
     renderBooks("all");
   }
@@ -97,6 +111,7 @@
         <img src="${b.cover}" class="book-cover">
         <h3>${b.title}</h3>
         <p><strong>${b.category}</strong></p>
+        <p><strong>Puan:</strong> ${b.avgRating}</p>
         <p>${b.desc.substring(0, 80)}...</p>
         <a href="book.html?id=${b.id}" class="btn-secondary">Detayları Gör</a>
       `;
