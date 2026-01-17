@@ -2,23 +2,151 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Ana Sayfa | M. Furkan</title>
+  <title>M. Furkan | Ruhsal Yolculuk</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
+
+  <style>
+    body {
+      background: linear-gradient(to bottom, #1A2A40, #4B3F72);
+      color: #F2F2F2;
+      font-family: "Georgia", serif;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 120px 20px;
+      background: url('assets/hero-bg.jpg') center/cover no-repeat;
+      background-blend-mode: overlay;
+      background-color: rgba(0,0,0,0.45);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .hero p {
+      font-size: 20px;
+      opacity: 0.9;
+    }
+
+    .quote-box {
+      margin: 40px auto;
+      padding: 20px;
+      max-width: 700px;
+      background: rgba(255,255,255,0.08);
+      border-left: 4px solid #D4A373;
+      font-style: italic;
+      font-size: 20px;
+      border-radius: 6px;
+    }
+
+    .author-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin: 60px auto;
+      max-width: 900px;
+    }
+
+    .author-photo {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #D4A373;
+    }
+
+    .author-text {
+      max-width: 500px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .signature {
+      margin-top: 10px;
+      width: 180px;
+      opacity: 0.8;
+    }
+
+    .latest-book {
+      margin: 60px auto;
+      max-width: 900px;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .latest-book img {
+      width: 180px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .latest-book h3 {
+      margin-bottom: 10px;
+    }
+
+    .btn-light {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #D4A373;
+      color: #1A2A40;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .nav a, .nav button {
+      color: #F2F2F2;
+    }
+  </style>
 </head>
 <body>
 
 <header class="site-header">
   <div class="logo">M. Furkan</div>
   <nav class="nav" id="nav-menu">
-    <!-- Menü elemanları JS ile doldurulacak -->
+    <!-- Menü JS ile doldurulacak -->
   </nav>
 </header>
 
-<main class="section">
-  <h1>Hoş Geldiniz</h1>
-  <p>Bu site M. Furkan’ın kitaplarını, yazılarını ve projelerini içerir.</p>
-</main>
+<!-- HERO -->
+<section class="hero">
+  <h1>Kalbinin Yükünü Hafifleten Kelimeler</h1>
+  <p>Ruhun karanlık gecelerinde bir ışık arayanlara…</p>
+</section>
+
+<!-- DİNAMİK VECİZ SÖZ -->
+<div class="quote-box" id="quote-box">
+  Yükleniyor...
+</div>
+
+<!-- YAZAR BÖLÜMÜ -->
+<section class="author-section">
+  <img src="assets/author.jpg" class="author-photo" id="author-photo">
+
+  <div class="author-text">
+    <p id="author-bio">
+      Ruhsal yolculuklara eşlik eden bir kalem.  
+      İnsanların karanlık dönemlerinde bir ışık olma niyetiyle yazıyorum.
+    </p>
+
+    <img src="assets/signature.png" class="signature" id="author-signature">
+  </div>
+</section>
+
+<!-- SON EKLENEN KİTAP -->
+<section class="latest-book" id="latest-book">
+  <h2>Son Eklenen Kitap</h2>
+  <p>Yükleniyor...</p>
+</section>
 
 <footer class="site-footer">
   <p>© <span id="year"></span> M. Furkan</p>
@@ -35,7 +163,12 @@
   import {
     getFirestore,
     doc,
-    getDoc
+    getDoc,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    limit
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -54,12 +187,11 @@
 
   const nav = document.getElementById("nav-menu");
 
-  // 🔥 Kullanıcı giriş kontrolü
+  /* -------------------------
+     MENÜ GİRİŞ KONTROLÜ
+  ------------------------- */
   onAuthStateChanged(auth, async (user) => {
-    nav.innerHTML = ""; // Menü temizle
-
-    // Herkese görünen menü
-    nav.innerHTML += `
+    nav.innerHTML = `
       <a href="index.html">Ana Sayfa</a>
       <a href="books.html">Kitaplarım</a>
       <a href="about.html">Hakkımda</a>
@@ -67,35 +199,69 @@
     `;
 
     if (user) {
-      // Kullanıcı belgesini çek
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
       const role = snap.exists() ? snap.data().role : "user";
 
-      // Profil butonu
       nav.innerHTML += `<a href="profile.html">Profilim</a>`;
 
-      // Eğer editor ise ek menüler
       if (role === "editor") {
         nav.innerHTML += `<a href="editor.html">Editor Paneli</a>`;
         nav.innerHTML += `<a href="admin.html">Admin Paneli</a>`;
       }
 
-      // Çıkış butonu
       nav.innerHTML += `<button onclick="logout()" class="btn-secondary">Çıkış Yap</button>`;
-
     } else {
-      // Giriş yapmamış kullanıcı
       nav.innerHTML += `<a href="login.html">Giriş Yap</a>`;
     }
   });
 
-  // Çıkış fonksiyonu
   window.logout = function () {
-    signOut(auth).then(() => {
-      window.location.href = "index.html";
-    });
+    signOut(auth).then(() => window.location.href = "index.html");
   };
+
+  /* -------------------------
+     DİNAMİK VECİZ SÖZ
+  ------------------------- */
+  async function loadQuote() {
+    const snap = await getDocs(collection(db, "quotes"));
+    const quotes = snap.docs.map(d => d.data().text);
+
+    if (quotes.length === 0) {
+      document.getElementById("quote-box").textContent = "Henüz söz eklenmemiş.";
+      return;
+    }
+
+    const random = quotes[Math.floor(Math.random() * quotes.length)];
+    document.getElementById("quote-box").textContent = random;
+  }
+
+  loadQuote();
+
+  /* -------------------------
+     SON EKLENEN KİTAP
+  ------------------------- */
+  async function loadLatestBook() {
+    const q = query(collection(db, "books"), orderBy("createdAt", "desc"), limit(1));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      document.getElementById("latest-book").innerHTML += "<p>Henüz kitap eklenmemiş.</p>";
+      return;
+    }
+
+    const docItem = snap.docs[0];
+    const b = docItem.data();
+
+    document.getElementById("latest-book").innerHTML = `
+      <img src="${b.cover}">
+      <h3>${b.title}</h3>
+      <p>${b.desc.substring(0, 120)}...</p>
+      <a href="book.html?id=${docItem.id}" class="btn-light">Kitabı Gör</a>
+    `;
+  }
+
+  loadLatestBook();
 </script>
 
 </body>
