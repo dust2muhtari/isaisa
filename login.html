@@ -50,4 +50,20 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  window.loginUser = async function(email,
+  // 🔥 Firebase Login Fonksiyonu
+  window.loginUser = async function(email, password) {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+
+      // Başarılı giriş → editor.html
+      window.location.href = "editor.html";
+
+    } catch (error) {
+      document.getElementById("login-error").textContent =
+        "Giriş hatası: " + error.message;
+    }
+  };
+</script>
+
+</body>
+</html>
