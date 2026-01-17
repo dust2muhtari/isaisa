@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Paneli</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+  <style>
+    .user-card {
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+    .user-card strong { font-size: 16px; }
+    .role-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 5px;
+      color: white;
+    }
+    .role-user { background: #777; }
+    .role-editor { background: #007bff; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">Admin Paneli</div>
+  <nav class="nav">
+    <a href="editor.html">Editor Paneli</a>
+    <button onclick="logout()" class="btn-secondary">Çıkış Yap</button>
+  </nav>
+</header>
+
+<main class="section">
+  <h1>Kullanıcı Yönetimi</h1>
+  <p>Bu sayfada tüm kullanıcıları görebilir, rollerini değiştirebilir veya silebilirsiniz.</p>
+
+  <div id="user-list"></div>
+</main>
+
+<footer class="site-footer">
+  <p>© <span id="year"></span> M. Furkan</p>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    doc,
+    getDoc,
+    updateDoc,
+    deleteDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+    authDomain: "isahalis.firebaseapp.com",
+    projectId: "isahalis",
+    storageBucket: "isahalis.firebasestorage.app",
+    messagingSenderId: "33060832531",
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
+    measurementId: "G-2N25T885EH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // 🔒 Admin yetki kontrolü
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists() || snap.data().role !== "editor") {
+      alert("Bu sayfaya erişim yetkiniz yok.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    loadUsers();
+  });
+
+  // 🔓 Çıkış
+  window.logout = function () {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    });
+  };
+
+  // 📌 Kullanıcıları yükle
+  async function loadUsers() {
+    const list = document.getElementById("user-list");
+    list.innerHTML = "<p>Yükleniyor...</p>";
+
+    const snap = await getDocs(collection(db, "users"));
+    list.innerHTML = "";
+
+    snap.forEach((docItem) => {
+      const u = docItem.data();
+
+      const div = document.createElement("div");
+      div.className = "user-card";
+
+      div.innerHTML = `
+        <strong>${u.email}</strong>
+        <span class="role-badge role-${u.role}">${u.role}</span>
+        <br><br>
+
+        <button class="btn-secondary" onclick="toggleRole('${docItem.id}', '${u.role}')">
+          Rolü Değiştir
+        </button>
+
+        <button class="btn-secondary" style="background:#c0392b;color:white;"
+          onclick="deleteUser('${docItem.id}')">
+          Kullanıcıyı Sil
+        </button>
+      `;
+
+      list.appendChild(div);
+    });
+  }
+
+  // 🔄 Rol değiştir
+  window.toggleRole = async function (uid, currentRole) {
+    const newRole = currentRole === "editor" ? "user" : "editor";
+
+    await updateDoc(doc(db, "users", uid), {
+      role: newRole
+    });
+
+    alert("Rol güncellendi.");
+    loadUsers();
+  };
+
+  // ❌ Kullanıcı sil
+  window.deleteUser = async function (uid) {
+    if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
+
+    await deleteDoc(doc(db, "users", uid));
+
+    alert("Kullanıcı silindi.");
+    loadUsers();
+  };
+</script>
+
+</body>
+</html>
