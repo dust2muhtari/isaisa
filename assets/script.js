@@ -12,8 +12,7 @@
     doc,
     getDoc,
     collection,
-    getDocs,
-    addDoc
+    getDocs
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -31,7 +30,7 @@
   const db = getFirestore(app);
 
   /* ---------------------------------------------------
-     KAYIT (HERKES USER OLARAK KAYIT OLUR)
+     KAYIT
   --------------------------------------------------- */
   window.registerUser = async function(email, password) {
     try {
@@ -41,7 +40,7 @@
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         createdAt: Date.now(),
-        role: "user"   // herkes normal kullanıcı olarak kaydedilir
+        role: "user"
       });
 
       alert("Kayıt başarılı!");
@@ -52,22 +51,19 @@
   };
 
   /* ---------------------------------------------------
-     GİRİŞ (EDITOR Mİ USER MI KONTROL EDİLİR)
+     GİRİŞ (Editor / User ayrımı)
   --------------------------------------------------- */
   window.loginUser = async function(email, password) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Kullanıcı belgesini çek
       const userRef = doc(db, "users", user.uid);
       const snap = await getDoc(userRef);
 
       if (snap.exists() && snap.data().role === "editor") {
-        // Editor → editor paneline
         window.location.href = "editor.html";
       } else {
-        // Normal kullanıcı → kitaplar sayfasına
         window.location.href = "books.html";
       }
 
@@ -75,35 +71,5 @@
       alert("Giriş hatası: " + error.message);
     }
   };
-
-  /* ---------------------------------------------------
-     KİTAPLARI FIRESTORE'DAN ÇEKME (books.html)
-  --------------------------------------------------- */
-  async function loadBooks() {
-    const container = document.getElementById("books-container");
-    if (!container) return; // Bu sayfada değilsek çalışmasın
-
-    container.innerHTML = "<p>Yükleniyor...</p>";
-
-    const snap = await getDocs(collection(db, "books"));
-    container.innerHTML = "";
-
-    snap.forEach((docItem) => {
-      const b = docItem.data();
-
-      const div = document.createElement("div");
-      div.className = "book-card";
-      div.innerHTML = `
-        <img src="${b.cover}" class="book-cover">
-        <h3>${b.title}</h3>
-        <p>${b.desc.substring(0, 80)}...</p>
-        <a href="book.html?id=${docItem.id}" class="btn-secondary">Detayları Gör</a>
-      `;
-
-      container.appendChild(div);
-    });
-  }
-
-  loadBooks();
 
 </script>
