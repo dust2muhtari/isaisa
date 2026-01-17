@@ -5,6 +5,11 @@
   <title>Kitap Detayı</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
+  <style>
+    .stars { font-size: 22px; cursor: pointer; color: #ccc; }
+    .stars.selected { color: gold; }
+    .comment-stars { color: gold; font-size: 18px; }
+  </style>
 </head>
 <body>
 
@@ -23,6 +28,10 @@
     <h1 id="book-title">Yükleniyor...</h1>
     <img id="book-cover" style="width:200px;border-radius:8px;margin:20px 0;">
     <p id="book-desc"></p>
+
+    <h3>Ortalama Puan</h3>
+    <p id="avg-rating">Hesaplanıyor...</p>
+
     <hr style="margin:2rem 0;opacity:0.3;">
     <h3>Kitap Tam Metni</h3>
     <p id="book-full"></p>
@@ -43,6 +52,16 @@
 
     <form id="comment-form" onsubmit="submitComment(event)" style="display:none;">
       <input type="text" id="comment-name" placeholder="Adınız" required />
+
+      <label>Puanınız:</label>
+      <div id="rating-stars">
+        <span class="stars" data-value="1">★</span>
+        <span class="stars" data-value="2">★</span>
+        <span class="stars" data-value="3">★</span>
+        <span class="stars" data-value="4">★</span>
+        <span class="stars" data-value="5">★</span>
+      </div>
+
       <textarea id="comment-text" placeholder="Yorumunuz" rows="3" required></textarea>
       <button type="submit" class="btn-primary">Gönder</button>
     </form>
@@ -84,24 +103,16 @@
   const db = getFirestore(app);
 
   let currentUser = null;
+  let selectedRating = 0;
 
-  // URL'den kitap ID'sini al
   const params = new URLSearchParams(window.location.search);
   const bookId = params.get("id");
 
-  if (!bookId) {
-    document.getElementById("book-content").innerHTML = "<p>Kitap bulunamadı.</p>";
-  }
-
-  // 🔥 Kitap bilgilerini yükle
   async function loadBook() {
     const ref = doc(db, "books", bookId);
     const snap = await getDoc(ref);
 
-    if (!snap.exists()) {
-      document.getElementById("book-content").innerHTML = "<p>Kitap bulunamadı.</p>";
-      return;
-    }
+    if (!snap.exists()) return;
 
     const b = snap.data();
 
@@ -113,19 +124,26 @@
 
   loadBook();
 
-  // 🔥 Yorumları yükle
   async function loadComments() {
     const list = document.getElementById("comment-list");
     list.innerHTML = "";
 
     const snap = await getDocs(collection(db, "books", bookId, "comments"));
 
+    let totalRating = 0;
+    let count = 0;
+
     snap.forEach((c) => {
       const data = c.data();
+
+      totalRating += data.rating || 0;
+      count++;
+
       const div = document.createElement("div");
       div.className = "comment-item";
       div.innerHTML = `
         <strong>${data.name}</strong>
+        <span class="comment-stars">${"★".repeat(data.rating || 0)}</span>
         <p>${data.text}</p>
         <small>${new Date(data.createdAt).toLocaleString()}</small>
         <hr style="opacity:0.2;">
@@ -133,14 +151,16 @@
       list.appendChild(div);
     });
 
-    if (list.innerHTML === "") {
-      list.innerHTML = "<p>Henüz yorum yok.</p>";
+    if (count === 0) {
+      document.getElementById("avg-rating").textContent = "Henüz puanlama yok.";
+    } else {
+      const avg = (totalRating / count).toFixed(1);
+      document.getElementById("avg-rating").textContent = `${avg} / 5 ★`;
     }
   }
 
   loadComments();
 
-  // 🔥 Kullanıcı giriş kontrolü
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
 
@@ -154,11 +174,21 @@
     }
   });
 
-  // 🔥 Yorum gönderme
+  document.querySelectorAll(".stars").forEach(star => {
+    star.addEventListener("click", () => {
+      selectedRating = parseInt(star.dataset.value);
+
+      document.querySelectorAll(".stars").forEach(s => s.classList.remove("selected"));
+      for (let i = 0; i < selectedRating; i++) {
+        document.querySelectorAll(".stars")[i].classList.add("selected");
+      }
+    });
+  });
+
   window.submitComment = async function (e) {
     e.preventDefault();
 
-    if (!currentUser) return;
+    if (!currentUser || selectedRating === 0) return;
 
     const name = document.getElementById("comment-name").value;
     const text = document.getElementById("comment-text").value;
@@ -166,11 +196,15 @@
     await addDoc(collection(db, "books", bookId, "comments"), {
       name,
       text,
+      rating: selectedRating,
       userId: currentUser.uid,
       createdAt: Date.now()
     });
 
     document.getElementById("comment-form").reset();
+    selectedRating = 0;
+    document.querySelectorAll(".stars").forEach(s => s.classList.remove("selected"));
+
     loadComments();
   };
 </script>
