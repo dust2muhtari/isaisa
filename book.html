@@ -5,6 +5,9 @@
   <title>İçerik | İsa Halis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
+
+  <!-- QUILL -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 </head>
 <body>
 
@@ -46,7 +49,7 @@
     line-height: 1.6;
   }
 
-  /* GAZETE TARZI OKUMA ALANI – SADECE METİN KUTUSU AÇIK */
+  /* GAZETE TARZI OKUMA ALANI */
   .reading-area {
     background: #f4f4f4;
     color: #1f2937;
@@ -70,10 +73,6 @@
     margin: 2rem auto 0;
   }
 
-  .comments-wrapper h3 {
-    margin-bottom: 0.8rem;
-  }
-
   .comment-item {
     background: rgba(255,255,255,0.05);
     padding: 0.7rem 1rem;
@@ -94,7 +93,39 @@
     display: flex;
     justify-content: flex-end;
   }
+
+  /* MODAL */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+  }
+
+  .modal-box {
+    width: 900px;
+    max-width: 95%;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  #quillEditor {
+    height: 300px;
+  }
+
+  .modal-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
 </style>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -132,6 +163,8 @@
 
   let currentUser = null;
   let currentUserRole = "user";
+
+  let quill;
 
   if (!bookID) {
     document.body.innerHTML = "<p style='padding:2rem;'>Geçersiz içerik ID.</p>";
@@ -177,11 +210,7 @@
     document.getElementById("bookMeta").innerText =
       `${b.createdAt ? new Date(b.createdAt).toLocaleDateString() : ""} • ${b.category || ""}`;
 
-    document.getElementById("bookFull").innerHTML =
-      (b.fullText || "")
-        .split("\n")
-        .map(p => `<p>${p}</p>`)
-        .join("");
+    document.getElementById("bookFull").innerHTML = b.fullText || "";
   }
 
   async function loadComments() {
@@ -210,40 +239,45 @@
     }
   }
 
-  window.submitComment = async function(e) {
-    e.preventDefault();
-    if (!currentUser) {
-      alert("Yorum yazmak için giriş yapmalısınız.");
-      return;
-    }
+  // MODAL AÇ
+  window.openEditor = function () {
+    document.getElementById("modalBg").style.display = "flex";
 
-    const text = document.getElementById("commentText").value.trim();
-    if (!text) return;
-
-    await addDoc(collection(db, "books", bookID, "comments"), {
-      text,
-      userId: currentUser.uid,
-      userName: currentUser.email || "Kullanıcı",
-      createdAt: serverTimestamp()
+    quill = new Quill('#quillEditor', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['blockquote', 'link', 'image'],
+          [{ 'font': [] }],
+          [{ 'align': [] }],
+          ['clean']
+        ]
+      }
     });
 
-    document.getElementById("commentText").value = "";
-    loadComments();
+    quill.root.innerHTML = document.getElementById("bookFull").innerHTML;
   };
 
-  window.editFullText = async function() {
-    if (currentUserRole !== "editor") return;
+  // MODAL KAPAT
+  window.closeEditor = function () {
+    document.getElementById("modalBg").style.display = "none";
+  };
 
-    const currentText = document.getElementById("bookFull").innerText;
-    const newText = prompt("Metni düzenleyin:", currentText);
-    if (newText === null) return;
+  // KAYDET
+  window.saveEditedText = async function () {
+    const newHTML = quill.root.innerHTML;
 
     await updateDoc(doc(db, "books", bookID), {
-      fullText: newText
+      fullText: newHTML
     });
 
-    await loadBook();
-    alert("Metin güncellendi.");
+    document.getElementById("bookFull").innerHTML = newHTML;
+
+    closeEditor();
+    alert("Metin başarıyla güncellendi.");
   };
 </script>
 
@@ -272,7 +306,7 @@
   <div class="reading-area" id="bookFull"></div>
 
   <div id="editBar" class="edit-bar" style="display:none;">
-    <button class="btn-secondary" onclick="editFullText()">Metni Düzenle (Editor)</button>
+    <button class="btn-secondary" onclick="openEditor()">Metni Düzenle (Editor)</button>
   </div>
 
   <section class="comments-wrapper">
@@ -288,6 +322,20 @@
   </section>
 
 </main>
+
+<!-- MODAL -->
+<div id="modalBg" class="modal-bg">
+  <div class="modal-box">
+    <h3>Metni Düzenle</h3>
+
+    <div id="quillEditor"></div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeEditor()">İptal</button>
+      <button class="btn-primary" onclick="saveEditedText()">Kaydet</button>
+    </div>
+  </div>
+</div>
 
 <footer class="site-footer">
   <p>© <span id="year"></span> İsa Halis</p>
