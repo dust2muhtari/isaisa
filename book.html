@@ -161,7 +161,11 @@
     document.getElementById("ratingStars").innerHTML = html;
   }
 
-  window.addEventListener("click", async (e) => {
+  document.addEventListener("DOMContentLoaded", () => {
+    highlightStars(0);
+  });
+
+  document.getElementById("ratingStars").addEventListener("click", async (e) => {
     if (!e.target.dataset.star) return;
     if (!currentUser) return alert("Puan vermek için giriş yapmalısınız.");
 
@@ -174,7 +178,7 @@
         userId: currentUser.uid,
         createdAt: serverTimestamp()
       },
-      { merge: true }   // ⭐ Alt koleksiyon yoksa bile otomatik oluşturur
+      { merge: true }
     );
 
     highlightStars(rating);
