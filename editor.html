@@ -5,17 +5,35 @@
   <title>Editor Paneli</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
+
+  <!-- QUILL -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 </head>
 <body>
 
 <style>
   body { display: none; }
 
-  .book-cover {
-    width: 120px;
-    height: auto;
-    border-radius: 6px;
-    margin-bottom: 10px;
+  /* FORM GENİŞLİĞİ 900px */
+  .editor-container {
+    width: 900px;
+    max-width: 95%;
+    margin: 2rem auto;
+    background: var(--card);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+
+  #quillEditor {
+    height: 300px;
+    background: #fff;
+    color: #000;
+    border-radius: 8px;
   }
 
   .book-card {
@@ -26,10 +44,14 @@
     margin-bottom: 1rem;
   }
 
-  .edit-btn {
-    margin-right: 10px;
+  .book-cover {
+    width: 120px;
+    border-radius: 6px;
+    margin-bottom: 10px;
   }
 </style>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -64,9 +86,10 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let editID = null; // düzenleme modu için
+  let editID = null;
+  let quill;
 
-  // 🔒 YETKİ KONTROLÜ
+  // YETKİ KONTROLÜ
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = "login.html";
@@ -86,25 +109,42 @@
     loadBooks();
   });
 
-  // 🔓 ÇIKIŞ
+  // ÇIKIŞ
   window.logout = function () {
     signOut(auth).then(() => {
       window.location.href = "login.html";
     });
   };
 
-  // 📚 KİTAP EKLEME / GÜNCELLEME
+  // QUILL BAŞLAT
+  function initQuill() {
+    quill = new Quill('#quillEditor', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['blockquote', 'link', 'image'],
+          [{ 'font': [] }],
+          [{ 'align': [] }],
+          ['clean']
+        ]
+      }
+    });
+  }
+
+  // KİTAP EKLEME / GÜNCELLEME
   window.submitBook = async function (e) {
     e.preventDefault();
 
     const title = document.getElementById("bookTitle").value;
     const desc = document.getElementById("bookDesc").value;
-    const fullText = document.getElementById("bookFullText").value;
+    const fullText = quill.root.innerHTML;
     const cover = document.getElementById("bookCover").value;
     const category = document.getElementById("bookCategory").value;
 
     if (!editID) {
-      // ➕ YENİ EKLEME
       await addDoc(collection(db, "books"), {
         title,
         desc,
@@ -116,7 +156,6 @@
 
       alert("İçerik başarıyla eklendi.");
     } else {
-      // ✏️ GÜNCELLEME
       await updateDoc(doc(db, "books", editID), {
         title,
         desc,
@@ -131,10 +170,11 @@
     }
 
     e.target.reset();
+    quill.root.innerHTML = "";
     loadBooks();
   };
 
-  // 📖 KİTAPLARI LİSTELEME
+  // KİTAPLARI LİSTELEME
   async function loadBooks() {
     const list = document.getElementById("bookList");
     list.innerHTML = "<p>Yükleniyor...</p>";
@@ -153,14 +193,14 @@
         <p><strong>Kategori:</strong> ${b.category}</p>
         <p>${b.desc}</p>
 
-        <button class="btn-secondary edit-btn" onclick="editBook('${docItem.id}')">Düzenle</button>
+        <button class="btn-secondary" onclick="editBook('${docItem.id}')">Düzenle</button>
         <button class="btn-secondary" onclick="deleteBook('${docItem.id}')">Sil</button>
       `;
       list.appendChild(div);
     });
   }
 
-  // ✏️ KİTAP DÜZENLEME
+  // KİTAP DÜZENLEME
   window.editBook = async function (id) {
     const ref = doc(db, "books", id);
     const snap = await getDoc(ref);
@@ -171,20 +211,23 @@
 
     document.getElementById("bookTitle").value = b.title;
     document.getElementById("bookDesc").value = b.desc;
-    document.getElementById("bookFullText").value = b.fullText;
     document.getElementById("bookCover").value = b.cover;
     document.getElementById("bookCategory").value = b.category;
+
+    quill.root.innerHTML = b.fullText || "";
 
     editID = id;
     document.getElementById("formTitle").innerText = "İçeriği Düzenle";
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ❌ KİTAP SİLME
+  // KİTAP SİLME
   window.deleteBook = async function (id) {
     await deleteDoc(doc(db, "books", id));
     loadBooks();
   };
+
+  window.onload = initQuill;
 </script>
 
 <header class="site-header">
@@ -196,7 +239,7 @@
   </nav>
 </header>
 
-<main class="section">
+<main class="editor-container">
   <h2 id="formTitle">Yeni İçerik Ekle</h2>
 
   <form id="bookForm" class="contact-form" onsubmit="submitBook(event)">
@@ -212,7 +255,7 @@
 
     <div class="form-group">
       <label>Tam Metin</label>
-      <textarea id="bookFullText" rows="10"></textarea>
+      <div id="quillEditor"></div>
     </div>
 
     <div class="form-group">
