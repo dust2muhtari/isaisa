@@ -2,42 +2,59 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Kayıt Ol</title>
+  <title>Kayıt Ol | İsa Halis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
 </head>
-<body class="login-body">
+<body>
 
-<div class="login-container">
-  <h2>Yeni Hesap Oluştur</h2>
+<header class="site-header">
+  <div class="logo">İsa Halis</div>
+  <nav class="nav">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="books.html">Kitaplarım</a>
+    <a href="about.html">Hakkımda</a>
+    <a href="contact.html">İletişim</a>
+  </nav>
+</header>
 
-  <form onsubmit="event.preventDefault(); registerUser(email.value, password.value)">
-    <div class="form-group">
-      <label>E‑posta</label>
-      <input type="email" id="email" required />
-    </div>
+<main class="section">
+  <h1>Kayıt Ol</h1>
 
-    <div class="form-group">
-      <label>Şifre</label>
-      <input type="password" id="password" required />
-    </div>
+  <div class="card" style="max-width:400px; margin-top:1.5rem;">
+    <form id="registerForm">
+      <div class="form-group">
+        <label>E‑posta</label>
+        <input type="email" id="email" required />
+      </div>
+      <div class="form-group">
+        <label>Şifre</label>
+        <input type="password" id="password" required />
+      </div>
+      <button type="submit" class="btn-primary">Kayıt Ol</button>
+    </form>
 
-    <button type="submit" class="btn-primary">Kayıt Ol</button>
-  </form>
+    <p style="margin-top:1rem; font-size:0.9rem;">
+      Zaten hesabın var mı? <a href="login.html">Giriş yap</a>
+    </p>
+  </div>
+</main>
 
-  <p id="register-error" class="error-msg"></p>
-
-  <p style="margin-top:15px;">
-    Zaten hesabın var mı? <a href="login.html">Giriş Yap</a>
-  </p>
-</div>
+<footer class="site-footer">
+  © <span id="year"></span> İsa Halis. Tüm hakları saklıdır.
+</footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword } 
-    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-  import { getFirestore, setDoc, doc } 
-    from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
@@ -45,32 +62,38 @@
     projectId: "isahalis",
     storageBucket: "isahalis.firebasestorage.app",
     messagingSenderId: "33060832531",
-    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
-    measurementId: "G-2N25T885EH"
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  window.registerUser = async function(email, password) {
+  document.getElementById("year").innerText = new Date().getFullYear();
+
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const user = cred.user;
 
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        role: "user",
+        banned: false
       });
 
       alert("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.");
       window.location.href = "login.html";
-
-    } catch (error) {
-      document.getElementById("register-error").textContent =
-        "Kayıt hatası: " + error.message;
+    } catch (err) {
+      alert("Kayıt hatası: " + err.message);
     }
-  };
+  });
 </script>
 
 </body>
