@@ -2,65 +2,341 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin Paneli</title>
+  <title>Admin Paneli | İsa Halis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
   <style>
-    .user-card {
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      background: #fafafa;
+    body { display: none; }
+
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+      background: #050816;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .user-card strong { font-size: 16px; }
-    .role-badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      margin-left: 5px;
+
+    .sidebar {
+      width: 260px;
+      background: #020617;
+      border-right: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .sidebar .logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .sidebar-nav button {
+      width: 100%;
+      text-align: left;
+      padding: 0.6rem 0.8rem;
+      border-radius: 0.5rem;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sidebar-nav button.active,
+    .sidebar-nav button:hover {
+      background: rgba(148, 163, 184, 0.15);
+      color: #e5e7eb;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      padding-top: 1rem;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-topbar {
+      height: 60px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(10px);
+    }
+
+    .admin-topbar-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .admin-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .admin-topbar-right button {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: transparent;
+      color: #e5e7eb;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .admin-content {
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .cards-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.15), rgba(15,23,42,1));
+      border-radius: 0.9rem;
+      padding: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .card {
+      background: rgba(15,23,42,0.9);
+      border-radius: 0.9rem;
+      padding: 1.2rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      margin-bottom: 1.5rem;
+    }
+
+    .card h3 {
+      margin-bottom: 0.8rem;
+      font-size: 1rem;
+      color: #e5e7eb;
+    }
+
+    .card p {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-bottom: 0.8rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .form-group label {
+      color: #e5e7eb;
+    }
+
+    .form-group input,
+    .form-group select {
+      background: #020617;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 0.45rem 0.6rem;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: none;
       color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      cursor: pointer;
     }
-    .role-user { background: #777; }
-    .role-editor { background: #007bff; }
+
+    .btn-secondary {
+      background: transparent;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: #e5e7eb;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 113, 113, 0.8);
+      color: #fecaca;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 0.5rem 0.6rem;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      color: #9ca3af;
+      font-weight: 500;
+      background: rgba(15,23,42,0.9);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:nth-child(even) {
+      background: rgba(15,23,42,0.7);
+    }
+
+    tr:hover {
+      background: rgba(30,64,175,0.35);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+    }
+
+    .badge-role-admin {
+      background: rgba(59,130,246,0.2);
+      color: #bfdbfe;
+    }
+
+    .badge-role-editor {
+      background: rgba(52,211,153,0.2);
+      color: #bbf7d0;
+    }
+
+    .badge-role-user {
+      background: rgba(148,163,184,0.2);
+      color: #e5e7eb;
+    }
+
+    .badge-ban-true {
+      background: rgba(248,113,113,0.2);
+      color: #fecaca;
+    }
+
+    .badge-ban-false {
+      background: rgba(34,197,94,0.2);
+      color: #bbf7d0;
+    }
+
+    .uid-text {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
+
+    .link-button {
+      font-size: 0.8rem;
+      color: #60a5fa;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      .admin-main {
+        flex: 1;
+      }
+    }
   </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="logo">Admin Paneli</div>
-  <nav class="nav">
-    <a href="editor.html">Editor Paneli</a>
-    <button onclick="logout()" class="btn-secondary">Çıkış Yap</button>
-  </nav>
-</header>
-
-<main class="section">
-  <h1>Kullanıcı Yönetimi</h1>
-  <p>Bu sayfada tüm kullanıcıları görebilir, rollerini değiştirebilir veya silebilirsiniz.</p>
-
-  <div id="user-list"></div>
-</main>
-
-<footer class="site-footer">
-  <p>© <span id="year"></span> M. Furkan</p>
-</footer>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { 
-    getAuth, 
+  import {
+    getAuth,
     onAuthStateChanged,
     signOut
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-
   import {
     getFirestore,
-    collection,
-    getDocs,
     doc,
     getDoc,
+    setDoc,
+    getDocs,
+    collection,
     updateDoc,
     deleteDoc
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
@@ -79,87 +355,382 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // 🔒 Admin yetki kontrolü
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
+  let currentUser = null;
+  let currentUserRole = "user";
 
-    const ref = doc(db, "users", user.uid);
-    const snap = await getDoc(ref);
+  // Basit toast
+  function toast(msg) {
+    alert(msg);
+  }
 
-    if (!snap.exists() || snap.data().role !== "editor") {
-      alert("Bu sayfaya erişim yetkiniz yok.");
-      window.location.href = "index.html";
-      return;
-    }
+  // Sidebar section switch
+  window.switchSection = function (id) {
+    document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
 
-    loadUsers();
-  });
+    document.querySelectorAll(".sidebar-nav button").forEach(btn => btn.classList.remove("active"));
+    const btn = document.querySelector(`.sidebar-nav button[data-section="${id}"]`);
+    if (btn) btn.classList.add("active");
 
-  // 🔓 Çıkış
+    const titleMap = {
+      "dashboard": "Yönetim Paneli",
+      "users": "Kullanıcı Yönetimi",
+      "content": "İçerik Yönetimi",
+      "comments": "Yorum Yönetimi",
+      "settings": "Site Ayarları",
+      "profile": "Profilim"
+    };
+    document.getElementById("topbarTitle").innerText = titleMap[id] || "Admin Paneli";
+  };
+
+  // Çıkış
   window.logout = function () {
     signOut(auth).then(() => {
       window.location.href = "login.html";
     });
   };
 
-  // 📌 Kullanıcıları yükle
-  async function loadUsers() {
-    const list = document.getElementById("user-list");
-    list.innerHTML = "<p>Yükleniyor...</p>";
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
 
-    const snap = await getDocs(collection(db, "users"));
-    list.innerHTML = "";
+    currentUser = user;
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
 
-    snap.forEach((docItem) => {
+    if (!userSnap.exists()) {
+      toast("Kullanıcı kaydı bulunamadı.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    const data = userSnap.data();
+    currentUserRole = data.role || "user";
+
+    if (data.banned) {
+      toast("Hesabınız askıya alınmıştır.");
+      await signOut(auth);
+      window.location.href = "login.html";
+      return;
+    }
+
+    if (currentUserRole !== "admin") {
+      toast("Bu sayfaya sadece adminler erişebilir.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    document.getElementById("adminEmail").innerText = currentUser.email || "";
+    document.body.style.display = "block";
+
+    await loadDashboardStats();
+    await loadUsers();
+    await loadContentList();
+
+    switchSection("dashboard");
+  });
+
+  async function loadDashboardStats() {
+    const usersSnap = await getDocs(collection(db, "users"));
+    const booksSnap = await getDocs(collection(db, "books"));
+
+    let totalUsers = 0;
+    let totalEditors = 0;
+    let totalAdmins = 0;
+    let totalBanned = 0;
+
+    usersSnap.forEach(docItem => {
+      totalUsers++;
       const u = docItem.data();
-
-      const div = document.createElement("div");
-      div.className = "user-card";
-
-      div.innerHTML = `
-        <strong>${u.email}</strong>
-        <span class="role-badge role-${u.role}">${u.role}</span>
-        <br><br>
-
-        <button class="btn-secondary" onclick="toggleRole('${docItem.id}', '${u.role}')">
-          Rolü Değiştir
-        </button>
-
-        <button class="btn-secondary" style="background:#c0392b;color:white;"
-          onclick="deleteUser('${docItem.id}')">
-          Kullanıcıyı Sil
-        </button>
-      `;
-
-      list.appendChild(div);
+      if (u.role === "editor") totalEditors++;
+      if (u.role === "admin") totalAdmins++;
+      if (u.banned) totalBanned++;
     });
+
+    document.getElementById("statTotalUsers").innerText = totalUsers;
+    document.getElementById("statTotalEditors").innerText = totalEditors;
+    document.getElementById("statTotalAdmins").innerText = totalAdmins;
+    document.getElementById("statTotalBanned").innerText = totalBanned;
+    document.getElementById("statTotalBooks").innerText = booksSnap.size;
   }
 
-  // 🔄 Rol değiştir
-  window.toggleRole = async function (uid, currentRole) {
-    const newRole = currentRole === "editor" ? "user" : "editor";
+  // Kullanıcı oluşturma (sadece Firestore tarafı; Auth için backend gerekir)
+  window.createUserRecord = async function (e) {
+    e.preventDefault();
 
-    await updateDoc(doc(db, "users", uid), {
-      role: newRole
+    const email = document.getElementById("newUserEmail").value.trim();
+    const role = document.getElementById("newUserRole").value;
+    const uid = document.getElementById("newUserUid").value.trim();
+
+    if (!email || !role || !uid) {
+      toast("Email, UID ve rol zorunludur.");
+      return;
+    }
+
+    await setDoc(doc(db, "users", uid), {
+      email,
+      role,
+      banned: false,
+      createdAt: Date.now()
     });
 
-    alert("Rol güncellendi.");
+    toast("Kullanıcı kaydı Firestore'a eklendi. (Auth için backend gerekir)");
+    document.getElementById("newUserForm").reset();
     loadUsers();
   };
 
-  // ❌ Kullanıcı sil
-  window.deleteUser = async function (uid) {
-    if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
+  async function loadUsers() {
+    const tbody = document.getElementById("usersTableBody");
+    tbody.innerHTML = "<tr><td colspan='6'>Yükleniyor...</td></tr>";
 
+    const snap = await getDocs(collection(db, "users"));
+    tbody.innerHTML = "";
+
+    snap.forEach(docItem => {
+      const u = docItem.data();
+      const tr = document.createElement("tr");
+
+      const roleClass =
+        u.role === "admin" ? "badge-role-admin" :
+        u.role === "editor" ? "badge-role-editor" :
+        "badge-role-user";
+
+      const bannedClass = u.banned ? "badge-ban-true" : "badge-ban-false";
+
+      const createdAt = u.createdAt
+        ? new Date(u.createdAt).toLocaleString()
+        : "-";
+
+      tr.innerHTML = `
+        <td>${u.email || "-"}</td>
+        <td><span class="badge ${roleClass}">${u.role || "user"}</span></td>
+        <td><span class="badge ${bannedClass}">${u.banned ? "Banlı" : "Aktif"}</span></td>
+        <td>${createdAt}</td>
+        <td><span class="uid-text">${docItem.id}</span></td>
+        <td>
+          <button class="btn-secondary" onclick="changeUserRole('${docItem.id}')">Rol Değiştir</button>
+          <button class="btn-secondary" onclick="toggleBanUser('${docItem.id}')">${u.banned ? "Banı Kaldır" : "Banla"}</button>
+          <button class="btn-danger" onclick="deleteUserRecord('${docItem.id}')">Sil</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    if (!tbody.innerHTML.trim()) {
+      tbody.innerHTML = "<tr><td colspan='6'>Kayıtlı kullanıcı bulunamadı.</td></tr>";
+    }
+  }
+
+  window.changeUserRole = async function (uid) {
+    const newRole = prompt("Yeni rolü girin (admin/editor/user):");
+    if (!newRole) return;
+    const role = newRole.trim().toLowerCase();
+    if (!["admin", "editor", "user"].includes(role)) {
+      toast("Geçersiz rol.");
+      return;
+    }
+    await updateDoc(doc(db, "users", uid), { role });
+    toast("Rol güncellendi.");
+    loadUsers();
+  };
+
+  window.toggleBanUser = async function (uid) {
+    const ref = doc(db, "users", uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const u = snap.data();
+    const newBan = !u.banned;
+    await updateDoc(ref, { banned: newBan });
+    toast(newBan ? "Kullanıcı banlandı." : "Kullanıcının banı kaldırıldı.");
+    loadUsers();
+  };
+
+  // Sadece Firestore kaydını siliyoruz; Auth tarafı için backend gerekir
+  window.deleteUserRecord = async function (uid) {
+    if (!confirm("Bu kullanıcı kaydını silmek istediğinize emin misiniz?")) return;
     await deleteDoc(doc(db, "users", uid));
-
-    alert("Kullanıcı silindi.");
+    toast("Kullanıcı kaydı Firestore'dan silindi. (Auth için backend gerekir)");
     loadUsers();
   };
+
+  async function loadContentList() {
+    const list = document.getElementById("contentList");
+    list.innerHTML = "<p>İçerikler yükleniyor...</p>";
+
+    const snap = await getDocs(collection(db, "books"));
+    list.innerHTML = "";
+
+    snap.forEach(docItem => {
+      const b = docItem.data();
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <h3>${b.title || "Başlıksız"}</h3>
+        <p style="font-size:0.8rem; color:#9ca3af;">
+          Kategori: ${b.category || "-"} • 
+          Tarih: ${b.createdAt ? new Date(b.createdAt).toLocaleDateString() : "-"}
+        </p>
+        <button class="btn-secondary" onclick="window.open('book.html?id=${docItem.id}', '_blank')">Görüntüle</button>
+        <button class="btn-secondary" onclick="window.open('editor.html', '_blank')">Editor Panelinde Düzenle</button>
+      `;
+      list.appendChild(div);
+    });
+
+    if (!list.innerHTML.trim()) {
+      list.innerHTML = "<p>Henüz içerik eklenmemiş.</p>";
+    }
+  }
 </script>
+
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="logo">Admin Paneli</div>
+    <div class="sidebar-nav">
+      <button data-section="dashboard" onclick="switchSection('dashboard')" class="active">Dashboard</button>
+      <button data-section="users" onclick="switchSection('users')">Kullanıcı Yönetimi</button>
+      <button data-section="content" onclick="switchSection('content')">İçerik Yönetimi</button>
+      <button data-section="comments" onclick="switchSection('comments')">Yorum Yönetimi</button>
+      <button data-section="settings" onclick="switchSection('settings')">Site Ayarları</button>
+      <button data-section="profile" onclick="switchSection('profile')">Profilim</button>
+      <button onclick="logout()">Çıkış</button>
+    </div>
+    <div class="sidebar-footer">
+      <div>Giriş yapan: <span id="adminEmail"></span></div>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-title" id="topbarTitle">Yönetim Paneli</div>
+      <div class="admin-topbar-right">
+        <span>Admin</span>
+        <button onclick="logout()">Çıkış</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="section active">
+        <div class="cards-row">
+          <div class="stat-card">
+            <div class="stat-label">Toplam Kullanıcı</div>
+            <div class="stat-value" id="statTotalUsers">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Editor Sayısı</div>
+            <div class="stat-value" id="statTotalEditors">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Admin Sayısı</div>
+            <div class="stat-value" id="statTotalAdmins">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Banlı Kullanıcı</div>
+            <div class="stat-value" id="statTotalBanned">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Toplam İçerik</div>
+            <div class="stat-value" id="statTotalBooks">0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Hızlı Erişim</h3>
+          <button class="btn-secondary" onclick="switchSection('users')">Kullanıcı Yönetimine Git</button>
+          <button class="btn-secondary" onclick="switchSection('content')">İçerik Yönetimine Git</button>
+          <button class="btn-secondary" onclick="window.open('editor.html', '_blank')">Yeni İçerik Ekle</button>
+        </div>
+      </section>
+
+      <!-- USERS -->
+      <section id="users" class="section">
+        <div class="card">
+          <h3>Yeni Kullanıcı Oluştur</h3>
+          <p>Not: Buradan sadece Firestore kullanıcı kaydı oluşturulur. Authentication tarafı için backend (Cloud Functions) gerekir.</p>
+          <form id="newUserForm" onsubmit="createUserRecord(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="newUserEmail" required />
+              </div>
+              <div class="form-group">
+                <label>Rol</label>
+                <select id="newUserRole" required>
+                  <option value="user">User</option>
+                  <option value="editor">Editor</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>UID (Auth tarafındaki kullanıcı ID'si)</label>
+                <input type="text" id="newUserUid" placeholder="Auth UID" required />
+              </div>
+            </div>
+            <div style="margin-top:0.8rem;">
+              <button type="submit" class="btn-primary">Kullanıcı Oluştur</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Kullanıcı Listesi</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th>Ban</th>
+                  <th>Kayıt Tarihi</th>
+                  <th>UID</th>
+                  <th>İşlemler</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTENT -->
+      <section id="content" class="section">
+        <div class="card">
+          <h3>İçerik Yönetimi</h3>
+          <p>Buradan mevcut içerikleri görebilir, detay sayfasını açabilir veya editor panelinde düzenleyebilirsin.</p>
+          <button class="btn-primary" onclick="window.open('editor.html', '_blank')">Yeni İçerik Ekle</button>
+        </div>
+        <div id="contentList"></div>
+      </section>
+
+      <!-- COMMENTS -->
+      <section id="comments" class="section">
+        <div class="card">
+          <h3>Yorum Yönetimi</h3>
+          <p>Şu an için yorumlar book.html üzerinden listeleniyor. İstersen buraya da merkezi bir yorum yönetim sistemi ekleyebiliriz.</p>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settings" class="section">
+        <div class="card">
+          <h3>Site Ayarları</h3>
+          <p>Logo, renk teması, meta açıklamaları gibi ayarları buraya ekleyebiliriz. Şimdilik placeholder olarak duruyor.</p>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="profile" class="section">
+        <div class="card">
+          <h3>Profilim</h3>
+          <p>Giriş yapan: <span id="adminEmail"></span></p>
+          <button class="btn-secondary" onclick="logout()">Çıkış Yap</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
