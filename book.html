@@ -167,11 +167,15 @@
 
     const rating = Number(e.target.dataset.star);
 
-    await setDoc(doc(db, "books", bookID, "ratings", currentUser.uid), {
-      rating,
-      userId: currentUser.uid,
-      createdAt: serverTimestamp()
-    });
+    await setDoc(
+      doc(db, "books", bookID, "ratings", currentUser.uid),
+      {
+        rating,
+        userId: currentUser.uid,
+        createdAt: serverTimestamp()
+      },
+      { merge: true }   // ⭐ Alt koleksiyon yoksa bile otomatik oluşturur
+    );
 
     highlightStars(rating);
     document.getElementById("ratingInfo").innerText = `Puanınız: ${rating} ★`;
