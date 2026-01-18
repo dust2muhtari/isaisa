@@ -46,7 +46,7 @@
     line-height: 1.6;
   }
 
-  /* GAZETE TARZI OKUMA ALANI */
+  /* GAZETE TARZI OKUMA ALANI – SADECE METİN KUTUSU AÇIK */
   .reading-area {
     background: #f4f4f4;
     color: #1f2937;
@@ -63,15 +63,54 @@
   .reading-area p {
     margin-bottom: 1rem;
   }
+
+  /* YORUM ALANI */
+  .comments-wrapper {
+    max-width: 680px;
+    margin: 2rem auto 0;
+  }
+
+  .comments-wrapper h3 {
+    margin-bottom: 0.8rem;
+  }
+
+  .comment-item {
+    background: rgba(255,255,255,0.05);
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 0.6rem;
+  }
+
+  .comment-meta {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.3rem;
+  }
+
+  .edit-bar {
+    max-width: 680px;
+    margin: 1rem auto 0;
+    display: flex;
+    justify-content: flex-end;
+  }
 </style>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { 
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
   import {
     getFirestore,
     doc,
-    getDoc
+    getDoc,
+    updateDoc,
+    collection,
+    addDoc,
+    getDocs,
+    serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -88,15 +127,39 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // URL'den ID alma
   const params = new URLSearchParams(window.location.search);
   const bookID = params.get("id");
+
+  let currentUser = null;
+  let currentUserRole = "user";
 
   if (!bookID) {
     document.body.innerHTML = "<p style='padding:2rem;'>Geçersiz içerik ID.</p>";
   }
 
-  // İçeriği yükleme
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user || null;
+
+    if (user) {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        currentUserRole = userSnap.data().role || "user";
+      }
+    }
+
+    await loadBook();
+    await loadComments();
+    document.body.style.display = "block";
+
+    if (currentUserRole === "editor") {
+      document.getElementById("editBar").style.display = "flex";
+    }
+    if (currentUser) {
+      document.getElementById("commentFormWrapper").style.display = "block";
+    }
+  });
+
   async function loadBook() {
     const ref = doc(db, "books", bookID);
     const snap = await getDoc(ref);
@@ -112,19 +175,76 @@
     document.getElementById("bookCover").src = b.cover || "assets/placeholder.jpg";
     document.getElementById("bookDesc").innerText = b.desc || "";
     document.getElementById("bookMeta").innerText =
-      `${new Date(b.createdAt).toLocaleDateString()} • ${b.category}`;
+      `${b.createdAt ? new Date(b.createdAt).toLocaleDateString() : ""} • ${b.category || ""}`;
 
-    // PARAGRAFLARI OTO AYIR
     document.getElementById("bookFull").innerHTML =
       (b.fullText || "")
         .split("\n")
         .map(p => `<p>${p}</p>`)
         .join("");
-
-    document.body.style.display = "block";
   }
 
-  loadBook();
+  async function loadComments() {
+    const list = document.getElementById("commentList");
+    list.innerHTML = "<p>Yorumlar yükleniyor...</p>";
+
+    const snap = await getDocs(collection(db, "books", bookID, "comments"));
+    list.innerHTML = "";
+
+    snap.forEach((docItem) => {
+      const c = docItem.data();
+      const div = document.createElement("div");
+      div.className = "comment-item";
+      div.innerHTML = `
+        <p>${c.text || ""}</p>
+        <p class="comment-meta">
+          ${c.userName || "Anonim"} • 
+          ${c.createdAt ? new Date(c.createdAt.toDate ? c.createdAt.toDate() : c.createdAt).toLocaleString() : ""}
+        </p>
+      `;
+      list.appendChild(div);
+    });
+
+    if (!list.innerHTML.trim()) {
+      list.innerHTML = "<p>Henüz yorum yok.</p>";
+    }
+  }
+
+  window.submitComment = async function(e) {
+    e.preventDefault();
+    if (!currentUser) {
+      alert("Yorum yazmak için giriş yapmalısınız.");
+      return;
+    }
+
+    const text = document.getElementById("commentText").value.trim();
+    if (!text) return;
+
+    await addDoc(collection(db, "books", bookID, "comments"), {
+      text,
+      userId: currentUser.uid,
+      userName: currentUser.email || "Kullanıcı",
+      createdAt: serverTimestamp()
+    });
+
+    document.getElementById("commentText").value = "";
+    loadComments();
+  };
+
+  window.editFullText = async function() {
+    if (currentUserRole !== "editor") return;
+
+    const currentText = document.getElementById("bookFull").innerText;
+    const newText = prompt("Metni düzenleyin:", currentText);
+    if (newText === null) return;
+
+    await updateDoc(doc(db, "books", bookID), {
+      fullText: newText
+    });
+
+    await loadBook();
+    alert("Metin güncellendi.");
+  };
 </script>
 
 <header class="site-header">
@@ -150,6 +270,22 @@
   <div id="bookDesc" class="book-desc"></div>
 
   <div class="reading-area" id="bookFull"></div>
+
+  <div id="editBar" class="edit-bar" style="display:none;">
+    <button class="btn-secondary" onclick="editFullText()">Metni Düzenle (Editor)</button>
+  </div>
+
+  <section class="comments-wrapper">
+    <h3>Yorumlar</h3>
+    <div id="commentList"></div>
+
+    <div id="commentFormWrapper" style="display:none; margin-top:1rem;">
+      <form onsubmit="submitComment(event)" class="comment-form">
+        <textarea id="commentText" rows="3" placeholder="Yorumunuzu yazın..." required></textarea>
+        <button type="submit" class="btn-primary">Yorumu Gönder</button>
+      </form>
+    </div>
+  </section>
 
 </main>
 
