@@ -2,40 +2,205 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Ana Sayfa | M. Furkan</title>
+  <title>Ana Sayfa | İsa Halis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
+
+  <style>
+    /* --- HERKUL TARZI ALT MENÜ --- */
+    .sub-nav {
+      width: 100%;
+      background: var(--bg-alt);
+      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sub-left {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+    }
+
+    .sub-left a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .sub-left a:hover {
+      color: var(--accent);
+    }
+
+    /* Dropdown */
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      top: 1.8rem;
+      min-width: 160px;
+      z-index: 20;
+    }
+
+    .dropdown-content a {
+      display: block;
+      padding: 0.6rem 0.9rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dropdown-content a:hover {
+      color: var(--accent);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .search-icon {
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: 0.2s;
+    }
+
+    .search-icon:hover {
+      color: var(--accent);
+    }
+
+    /* --- GÜNCEL İÇERİKLER (Herkul tarzı kartlar) --- */
+    .content-section {
+      max-width: var(--max-width);
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .content-title {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent);
+      box-shadow: 0 22px 50px rgba(249, 115, 22, 0.25);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .card-content h3 {
+      margin: 0 0 0.4rem;
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+
+    .card-content p {
+      margin: 0.3rem 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+  </style>
 </head>
 <body>
 
+<!-- ÜST MENÜ (senin orijinal header yapın) -->
 <header class="site-header">
-  <div class="logo">M. Furkan</div>
-  <nav class="nav" id="nav-menu">
-    <!-- Menü elemanları JS ile doldurulacak -->
-  </nav>
+  <div class="logo">İsa Halis</div>
+  <nav class="nav" id="nav-menu"></nav>
 </header>
+<section class="hero">
+  <div class="hero-content">
+    <h1>İsa Halis</h1>
+    <p>Kalbinin yükünü hafifleten kelimeler</p>
+    <p style="font-style: italic; color: var(--muted); margin-top: 0.6rem;">
+      Ruhun karanlık gecelerinde bir ışık arayanlara…
+    </p>
+  </div>
+</section>
+<!-- HERKUL TARZI ALT MENÜ -->
+<div class="sub-nav">
+  <div class="sub-left">
+    <a style="color: var(--accent); font-weight: 600;">İsa Halis</a>
+    <a href="#">İsa Halis</a>
+    <a href="#">İnsanın Fabrika Ayarları 1</a>
+    <a href="#">İnsanın Fabrika Ayarları 2</a>
+    <a href="#">İnsanın Fabrika Ayarları 3</a>
 
-<main class="section">
-  <h1>Hoş Geldiniz</h1>
-  <p>Bu site M. Furkan’ın kitaplarını, yazılarını ve projelerini içerir.</p>
-</main>
+    <div class="dropdown">
+      <a href="#">Diğer ▼</a>
+      <div class="dropdown-content">
+        <a href="#">Özlü Sözler</a>
+        <a href="#">İnsanın Fabrika Ayarları</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-icon">🔍</div>
+</div>
+
+<!-- GÜNCEL İÇERİKLER -->
+<section class="content-section">
+  <div class="content-title">Güncel İçerikler</div>
+  <div class="grid" id="content-grid">
+    <p>Yükleniyor...</p>
+  </div>
+</section>
 
 <footer class="site-footer">
-  <p>© <span id="year"></span> M. Furkan</p>
+  <p>© <span id="year"></span> İsa Halis</p>
 </footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signOut 
-  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
   import {
     getFirestore,
     doc,
-    getDoc
+    getDoc,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    limit
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -54,12 +219,9 @@
 
   const nav = document.getElementById("nav-menu");
 
-  // 🔥 Kullanıcı giriş kontrolü
+  /* ÜST MENÜ GİRİŞ KONTROLÜ */
   onAuthStateChanged(auth, async (user) => {
-    nav.innerHTML = ""; // Menü temizle
-
-    // Herkese görünen menü
-    nav.innerHTML += `
+    nav.innerHTML = `
       <a href="index.html">Ana Sayfa</a>
       <a href="books.html">Kitaplarım</a>
       <a href="about.html">Hakkımda</a>
@@ -67,35 +229,64 @@
     `;
 
     if (user) {
-      // Kullanıcı belgesini çek
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
       const role = snap.exists() ? snap.data().role : "user";
 
-      // Profil butonu
       nav.innerHTML += `<a href="profile.html">Profilim</a>`;
 
-      // Eğer editor ise ek menüler
       if (role === "editor") {
         nav.innerHTML += `<a href="editor.html">Editor Paneli</a>`;
         nav.innerHTML += `<a href="admin.html">Admin Paneli</a>`;
       }
 
-      // Çıkış butonu
       nav.innerHTML += `<button onclick="logout()" class="btn-secondary">Çıkış Yap</button>`;
-
     } else {
-      // Giriş yapmamış kullanıcı
       nav.innerHTML += `<a href="login.html">Giriş Yap</a>`;
     }
   });
 
-  // Çıkış fonksiyonu
   window.logout = function () {
-    signOut(auth).then(() => {
-      window.location.href = "index.html";
-    });
+    signOut(auth).then(() => window.location.href = "index.html");
   };
+
+  /* GÜNCEL İÇERİKLER */
+  async function loadContent() {
+    const grid = document.getElementById("content-grid");
+    grid.innerHTML = "";
+
+    const q = query(collection(db, "books"), orderBy("createdAt", "desc"), limit(4));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      grid.innerHTML = "<p>Henüz içerik eklenmemiş.</p>";
+      return;
+    }
+
+    snap.forEach(docItem => {
+      const b = docItem.data();
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <img src="${b.cover || 'assets/placeholder.jpg'}">
+        <div class="card-content">
+          <h3>${b.title}</h3>
+          <p>${b.desc ? b.desc.substring(0, 120) + '...' : ''}</p>
+          <p style="opacity:0.6;font-size:0.75rem;margin-top:6px;">
+            ${b.createdAt ? new Date(b.createdAt).toLocaleDateString() : ''}
+          </p>
+        </div>
+      `;
+      card.onclick = () => window.location.href = "book.html?id=" + docItem.id;
+
+      grid.appendChild(card);
+    });
+  }
+
+  loadContent();
+
+  document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 
 </body>
