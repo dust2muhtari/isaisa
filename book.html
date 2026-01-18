@@ -49,7 +49,6 @@
     line-height: 1.6;
   }
 
-  /* GAZETE TARZI OKUMA ALANI */
   .reading-area {
     background: #f4f4f4;
     color: #1f2937;
@@ -67,7 +66,6 @@
     margin-bottom: 1rem;
   }
 
-  /* YORUM ALANI */
   .comments-wrapper {
     max-width: 680px;
     margin: 2rem auto 0;
@@ -94,7 +92,6 @@
     justify-content: flex-end;
   }
 
-  /* MODAL */
   .modal-bg {
     position: fixed;
     inset: 0;
@@ -163,7 +160,6 @@
 
   let currentUser = null;
   let currentUserRole = "user";
-
   let quill;
 
   if (!bookID) {
@@ -239,7 +235,28 @@
     }
   }
 
-  // MODAL AÇ
+  window.submitComment = async function (e) {
+    e.preventDefault();
+
+    if (!currentUser) {
+      alert("Yorum yazmak için giriş yapmalısınız.");
+      return;
+    }
+
+    const text = document.getElementById("commentText").value.trim();
+    if (!text) return;
+
+    await addDoc(collection(db, "books", bookID, "comments"), {
+      text,
+      userId: currentUser.uid,
+      userName: currentUser.email,
+      createdAt: serverTimestamp()
+    });
+
+    document.getElementById("commentText").value = "";
+    loadComments();
+  };
+
   window.openEditor = function () {
     document.getElementById("modalBg").style.display = "flex";
 
@@ -261,12 +278,10 @@
     quill.root.innerHTML = document.getElementById("bookFull").innerHTML;
   };
 
-  // MODAL KAPAT
   window.closeEditor = function () {
     document.getElementById("modalBg").style.display = "none";
   };
 
-  // KAYDET
   window.saveEditedText = async function () {
     const newHTML = quill.root.innerHTML;
 
@@ -323,7 +338,6 @@
 
 </main>
 
-<!-- MODAL -->
 <div id="modalBg" class="modal-bg">
   <div class="modal-box">
     <h3>Metni Düzenle</h3>
