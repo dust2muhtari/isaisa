@@ -10,11 +10,24 @@
 
 <style>
   body { display: none; }
+
   .book-cover {
     width: 120px;
     height: auto;
     border-radius: 6px;
     margin-bottom: 10px;
+  }
+
+  .book-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+  }
+
+  .edit-btn {
+    margin-right: 10px;
   }
 </style>
 
@@ -33,6 +46,7 @@
     collection,
     addDoc,
     getDocs,
+    updateDoc,
     deleteDoc
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
@@ -49,6 +63,8 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+
+  let editID = null; // düzenleme modu için
 
   // 🔒 YETKİ KONTROLÜ
   onAuthStateChanged(auth, async (user) => {
@@ -77,7 +93,7 @@
     });
   };
 
-  // 📚 KİTAP EKLEME
+  // 📚 KİTAP EKLEME / GÜNCELLEME
   window.submitBook = async function (e) {
     e.preventDefault();
 
@@ -87,16 +103,33 @@
     const cover = document.getElementById("bookCover").value;
     const category = document.getElementById("bookCategory").value;
 
-    await addDoc(collection(db, "books"), {
-      title,
-      desc,
-      fullText,
-      cover,
-      category,
-      createdAt: Date.now()
-    });
+    if (!editID) {
+      // ➕ YENİ EKLEME
+      await addDoc(collection(db, "books"), {
+        title,
+        desc,
+        fullText,
+        cover,
+        category,
+        createdAt: Date.now()
+      });
 
-    alert("Kitap başarıyla eklendi.");
+      alert("İçerik başarıyla eklendi.");
+    } else {
+      // ✏️ GÜNCELLEME
+      await updateDoc(doc(db, "books", editID), {
+        title,
+        desc,
+        fullText,
+        cover,
+        category
+      });
+
+      alert("İçerik güncellendi.");
+      editID = null;
+      document.getElementById("formTitle").innerText = "Yeni İçerik Ekle";
+    }
+
     e.target.reset();
     loadBooks();
   };
@@ -119,11 +152,33 @@
         <h3>${b.title}</h3>
         <p><strong>Kategori:</strong> ${b.category}</p>
         <p>${b.desc}</p>
+
+        <button class="btn-secondary edit-btn" onclick="editBook('${docItem.id}')">Düzenle</button>
         <button class="btn-secondary" onclick="deleteBook('${docItem.id}')">Sil</button>
       `;
       list.appendChild(div);
     });
   }
+
+  // ✏️ KİTAP DÜZENLEME
+  window.editBook = async function (id) {
+    const ref = doc(db, "books", id);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) return;
+
+    const b = snap.data();
+
+    document.getElementById("bookTitle").value = b.title;
+    document.getElementById("bookDesc").value = b.desc;
+    document.getElementById("bookFullText").value = b.fullText;
+    document.getElementById("bookCover").value = b.cover;
+    document.getElementById("bookCategory").value = b.category;
+
+    editID = id;
+    document.getElementById("formTitle").innerText = "İçeriği Düzenle";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // ❌ KİTAP SİLME
   window.deleteBook = async function (id) {
@@ -142,21 +197,21 @@
 </header>
 
 <main class="section">
-  <h2>Kitap Ekle</h2>
+  <h2 id="formTitle">Yeni İçerik Ekle</h2>
 
   <form id="bookForm" class="contact-form" onsubmit="submitBook(event)">
     <div class="form-group">
-      <label>Kitap Adı</label>
+      <label>Başlık</label>
       <input type="text" id="bookTitle" required />
     </div>
 
     <div class="form-group">
-      <label>Arka Kapak Yazısı</label>
+      <label>Kısa Açıklama</label>
       <textarea id="bookDesc" rows="4" required></textarea>
     </div>
 
     <div class="form-group">
-      <label>Kitap Tam Metni</label>
+      <label>Tam Metin</label>
       <textarea id="bookFullText" rows="10"></textarea>
     </div>
 
@@ -168,19 +223,18 @@
     <div class="form-group">
       <label>Kategori</label>
       <select id="bookCategory" required>
-        <option value="Roman">Roman</option>
-        <option value="Deneme">Deneme</option>
-        <option value="Korku">Korku</option>
-        <option value="Bilim Kurgu">Bilim Kurgu</option>
-        <option value="Fantastik">Fantastik</option>
-        <option value="Şiir">Şiir</option>
+        <option value="insan-fabrika-ayarları-1">İnsanın Fabrika Ayarları 1</option>
+        <option value="insan-fabrika-ayarları-2">İnsanın Fabrika Ayarları 2</option>
+        <option value="insan-fabrika-ayarları-3">İnsanın Fabrika Ayarları 3</option>
+        <option value="ozlu-sozler">Özlü Sözler</option>
+        <option value="diger">Diğer</option>
       </select>
     </div>
 
     <button type="submit" class="btn-primary">Kaydet</button>
   </form>
 
-  <h2 style="margin-top:2rem;">Mevcut Kitaplar</h2>
+  <h2 style="margin-top:2rem;">Mevcut İçerikler</h2>
   <div id="bookList"></div>
 </main>
 
