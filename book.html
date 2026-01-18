@@ -60,24 +60,35 @@
   if (!bookID) document.body.innerHTML = "<p style='padding:2rem;'>Geçersiz içerik ID.</p>";
 
   onAuthStateChanged(auth, async (user) => {
-    currentUser = user || null;
+  currentUser = user || null;
 
-    if (user) {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) currentUserRole = userSnap.data().role || "user";
+  if (user) {
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      currentUserRole = userSnap.data().role || "user";
     }
+  }
 
-    await loadBook();
-    await loadComments();
-    await loadAverageRating();
-    await loadUserRating();
+  await loadBook();
+  await loadComments();
+  await loadAverageRating();
+  await loadUserRating();
 
-    document.body.style.display = "block";
+  // Sayfayı göster
+  document.body.style.display = "block";
 
-    if (currentUserRole === "editor") document.getElementById("editBar").style.display = "flex";
-    if (currentUser) document.getElementById("commentFormWrapper").style.display = "block";
-  });
+  // Admin + Editor edit barı görür
+  if (currentUserRole === "editor" || currentUserRole === "admin") {
+    document.getElementById("editBar").style.display = "flex";
+  }
+
+  // Giriş yapan herkes yorum yazabilir
+  if (currentUser) {
+    document.getElementById("commentFormWrapper").style.display = "block";
+  }
+});
 
   async function loadBook() {
     const ref = doc(db, "books", bookID);
