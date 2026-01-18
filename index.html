@@ -7,7 +7,61 @@
   <link rel="stylesheet" href="assets/style.css" />
 
   <style>
-    /* --- HERKUL TARZI ALT MENÜ --- */
+    /* --- SLIDER --- */
+    .hero-slider {
+      position: relative;
+      width: 100%;
+      height: 420px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.9s ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .slide.prev {
+      transform: translateX(-100%);
+    }
+
+    .slide-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.75));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-left: 3rem;
+      padding-right: 3rem;
+      color: #fff;
+    }
+
+    .slide-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.8);
+    }
+
+    .slide-quote {
+      font-size: 1.1rem;
+      max-width: 600px;
+      line-height: 1.5;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.8);
+    }
+
+    /* --- ALT MENÜ (senin orijinal kodun) --- */
     .sub-nav {
       width: 100%;
       background: var(--bg-alt);
@@ -35,7 +89,6 @@
       color: var(--accent);
     }
 
-    /* Dropdown */
     .dropdown {
       position: relative;
     }
@@ -80,7 +133,7 @@
       color: var(--accent);
     }
 
-    /* --- GÜNCEL İÇERİKLER (Herkul tarzı kartlar) --- */
+    /* --- GÜNCEL İÇERİKLER (senin orijinal kodun) --- */
     .content-section {
       max-width: var(--max-width);
       margin: 3rem auto;
@@ -148,17 +201,10 @@
   <nav class="nav" id="nav-menu"></nav>
 </header>
 
-<section class="hero">
-  <div class="hero-content">
-    <h1>İsa Halis</h1>
-    <p>Kalbinin yükünü hafifleten kelimeler</p>
-    <p style="font-style: italic; color: var(--muted); margin-top: 0.6rem;">
-      Ruhun karanlık gecelerinde bir ışık arayanlara…
-    </p>
-  </div>
-</section>
+<!-- SLIDER -->
+<section class="hero-slider" id="slider"></section>
 
-<!-- HERKUL TARZI ALT MENÜ -->
+<!-- ALT MENÜ -->
 <div class="sub-nav">
   <div class="sub-left">
     <a style="color: var(--accent); font-weight: 600;">İsa Halis</a>
@@ -221,7 +267,7 @@
 
   const nav = document.getElementById("nav-menu");
 
-  /* ÜST MENÜ GİRİŞ KONTROLÜ */
+  /* ÜST MENÜ */
   onAuthStateChanged(auth, async (user) => {
     nav.innerHTML = `
       <a href="index.html">Ana Sayfa</a>
@@ -254,6 +300,48 @@
   window.logout = function () {
     signOut(auth).then(() => window.location.href = "index.html");
   };
+
+  /* SLIDER YÜKLEME */
+  async function loadSlider() {
+    const slider = document.getElementById("slider");
+    slider.innerHTML = "";
+
+    const q = query(collection(db, "homepageSlider"), orderBy("order", "asc"));
+    const snap = await getDocs(q);
+
+    let slides = [];
+
+    snap.forEach(docItem => {
+      const s = docItem.data();
+      slides.push(`
+        <div class="slide" style="background-image:url('${s.image}')">
+          <div class="slide-overlay">
+            <div class="slide-title">${s.title}</div>
+            <div class="slide-quote">${s.quote}</div>
+          </div>
+        </div>
+      `);
+    });
+
+    slider.innerHTML = slides.join("");
+
+    startSlider();
+  }
+
+  function startSlider() {
+    const slides = document.querySelectorAll(".slide");
+    let index = 0;
+
+    slides[index].classList.add("active");
+
+    setInterval(() => {
+      slides[index].classList.remove("active");
+      index = (index + 1) % slides.length;
+      slides[index].classList.add("active");
+    }, 6000);
+  }
+
+  loadSlider();
 
   /* GÜNCEL İÇERİKLER */
   async function loadContent() {
