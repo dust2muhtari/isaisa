@@ -2,14 +2,14 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>İletişim | M. Furkan</title>
+  <title>İletişim | İsa Halis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
 
 <header class="site-header">
-  <div class="logo">M. Furkan</div>
+  <div class="logo">İsa Halis</div>
   <nav class="nav">
     <a href="index.html">Ana Sayfa</a>
     <a href="books.html">Kitaplarım</a>
@@ -20,32 +20,31 @@
 
 <main class="section">
   <h1>İletişim</h1>
-  <p>Görüş, öneri veya iş birliği için aşağıdaki formu doldurabilirsiniz.</p>
+  <p>Görüş, öneri veya iş birliği için aşağıdaki e‑posta adresi üzerinden benimle iletişime geçebilirsiniz.</p>
 
-  <form class="contact-form" onsubmit="handleContactSubmit(event)">
-    <div class="form-group">
-      <label>Adınız</label>
-      <input type="text" id="name" required />
-    </div>
-
-    <div class="form-group">
-      <label>E-posta</label>
-      <input type="email" id="email" required />
-    </div>
-
-    <div class="form-group">
-      <label>Mesaj</label>
-      <textarea id="message" rows="6" required></textarea>
-    </div>
-
-    <button class="btn-primary" type="submit">Gönder</button>
-  </form>
+  <div class="contact-box" style="
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    text-align: center;
+  ">
+    <h2 style="margin-bottom: 0.5rem;">E‑posta</h2>
+    <a href="mailto:isahalis@hotmail.com" 
+       style="font-size: 1.2rem; color: var(--primary); text-decoration: underline;">
+       isahalis@hotmail.com
+    </a>
+  </div>
 </main>
 
 <footer class="site-footer">
-  © <span id="year"></span> M. Furkan. Tüm hakları saklıdır.
+  © <span id="year"></span> İsa Halis. Tüm hakları saklıdır.
 </footer>
 
-<script src="assets/script.js"></script>
+<script>
+  document.getElementById("year").innerText = new Date().getFullYear();
+</script>
+
 </body>
 </html>
