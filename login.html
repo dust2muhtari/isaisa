@@ -2,47 +2,55 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Giriş Yap</title>
+  <title>Giriş Yap | İsa Halis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
 </head>
-<body class="login-body">
+<body>
 
-<div class="login-container">
-  <h2>Giriş Yap</h2>
+<header class="site-header">
+  <div class="logo">İsa Halis</div>
+  <nav class="nav">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="books.html">Kitaplarım</a>
+    <a href="about.html">Hakkımda</a>
+    <a href="contact.html">İletişim</a>
+  </nav>
+</header>
 
-  <form onsubmit="event.preventDefault(); loginUser(email.value, password.value)">
-    <div class="form-group">
-      <label>E‑posta</label>
-      <input type="email" id="email" required />
-    </div>
+<main class="section">
+  <h1>Giriş Yap</h1>
 
-    <div class="form-group">
-      <label>Şifre</label>
-      <input type="password" id="password" required />
-    </div>
+  <div class="card" style="max-width:400px; margin-top:1.5rem;">
+    <form id="loginForm">
+      <div class="form-group">
+        <label>E‑posta</label>
+        <input type="email" id="email" required />
+      </div>
+      <div class="form-group">
+        <label>Şifre</label>
+        <input type="password" id="password" required />
+      </div>
+      <button type="submit" class="btn-primary">Giriş Yap</button>
+    </form>
 
-    <button type="submit" class="btn-primary">Giriş Yap</button>
-  </form>
+    <p style="margin-top:1rem; font-size:0.9rem;">
+      Hesabın yok mu? <a href="register.html">Kayıt ol</a>
+    </p>
+  </div>
+</main>
 
-  <p id="login-error" class="error-msg"></p>
-
-  <p style="margin-top:15px;">
-    Hesabın yok mu? <a href="register.html">Kayıt Ol</a>
-  </p>
-
-  <p style="margin-top:10px;">
-    <a href="index.html" class="btn-secondary">Ana Sayfaya Dön</a>
-  </p>
-</div>
+<footer class="site-footer">
+  © <span id="year"></span> İsa Halis. Tüm hakları saklıdır.
+</footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
   import { 
     getAuth, 
-    signInWithEmailAndPassword 
+    signInWithEmailAndPassword,
+    onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-
   import {
     getFirestore,
     doc,
@@ -55,37 +63,67 @@
     projectId: "isahalis",
     storageBucket: "isahalis.firebasestorage.app",
     messagingSenderId: "33060832531",
-    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
-    measurementId: "G-2N25T885EH"
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // 🔥 GÜNCEL LOGIN FONKSİYONU (Editor / User ayrımı)
-  window.loginUser = async function(email, password) {
+  document.getElementById("year").innerText = new Date().getFullYear();
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+    if (data.banned) {
+      alert("Hesabınız askıya alınmıştır.");
+      return;
+    }
+
+    if (data.role === "admin") window.location.href = "admin.html";
+    else if (data.role === "editor") window.location.href = "editor.html";
+    else window.location.href = "books.html";
+  });
+
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const user = cred.user;
 
-      // Kullanıcı belgesini Firestore'dan çek
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
 
-      if (snap.exists() && snap.data().role === "editor") {
-        // Editor → editor paneline
-        window.location.href = "editor.html";
-      } else {
-        // Normal kullanıcı → kitaplar sayfasına
-        window.location.href = "books.html";
+      if (!snap.exists()) {
+        alert("Kullanıcı kaydı bulunamadı.");
+        return;
       }
 
-    } catch (error) {
-      document.getElementById("login-error").textContent =
-        "Giriş hatası: " + error.message;
+      const data = snap.data();
+
+      if (data.banned) {
+        alert("Hesabınız askıya alınmıştır.");
+        return;
+      }
+
+      if (data.role === "admin") window.location.href = "admin.html";
+      else if (data.role === "editor") window.location.href = "editor.html";
+      else window.location.href = "books.html";
+
+    } catch (err) {
+      alert("Giriş hatası: " + err.message);
     }
-  };
+  });
 </script>
 
 </body>
