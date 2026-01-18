@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profilim | İsa Halis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body style="display:none;">
+
+<header class="site-header">
+  <div class="logo">İsa Halis</div>
+  <nav class="nav">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="books.html">Kitaplarım</a>
+    <a href="about.html">Hakkımda</a>
+    <a href="contact.html">İletişim</a>
+    <a href="profile.html">Profilim</a>
+  </nav>
+</header>
+
+<main class="section">
+  <h1>Profilim</h1>
+
+  <div class="card" style="max-width:600px; margin-top:1.5rem;">
+    <p><strong>E‑posta:</strong> <span id="pEmail"></span></p>
+    <p><strong>Rol:</strong> <span id="pRole"></span></p>
+    <p><strong>Durum:</strong> <span id="pStatus"></span></p>
+    <p><strong>Kayıt Tarihi:</strong> <span id="pCreatedAt"></span></p>
+
+    <div style="margin-top:1rem; display:flex; gap:10px;">
+      <button class="btn-primary" onclick="goToPanel()">Panelime Git</button>
+      <button class="btn-secondary" onclick="logout()">Çıkış Yap</button>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  © <span id="year"></span> İsa Halis. Tüm hakları saklıdır.
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_0Y9D2ljwwC7pHmaYTrbwc677kwIUrgQ",
+    authDomain: "isahalis.firebaseapp.com",
+    projectId: "isahalis",
+    storageBucket: "isahalis.firebasestorage.app",
+    messagingSenderId: "33060832531",
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  document.getElementById("year").innerText = new Date().getFullYear();
+
+  window.logout = function () {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    });
+  };
+
+  window.goToPanel = function () {
+    const role = document.getElementById("pRole").innerText;
+    if (role === "admin") window.location.href = "admin.html";
+    else if (role === "editor") window.location.href = "editor.html";
+    else window.location.href = "books.html";
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      alert("Kullanıcı kaydı bulunamadı.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    const data = snap.data();
+
+    if (data.banned) {
+      alert("Hesabınız askıya alınmıştır.");
+      await signOut(auth);
+      window.location.href = "login.html";
+      return;
+    }
+
+    document.getElementById("pEmail").innerText = data.email || user.email || "-";
+    document.getElementById("pRole").innerText = data.role || "user";
+    document.getElementById("pStatus").innerText = data.banned ? "Banlı" : "Aktif";
+    document.getElementById("pCreatedAt").innerText = data.createdAt 
+      ? new Date(data.createdAt).toLocaleString()
+      : "-";
+
+    document.body.style.display = "block";
+  });
+</script>
+
+</body>
+</html>
