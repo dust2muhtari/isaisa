@@ -5,6 +5,7 @@
   <title>Admin Paneli | İsa Halis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
+
   <style>
     body { display: none; }
 
@@ -116,13 +117,8 @@
       overflow-y: auto;
     }
 
-    .section {
-      display: none;
-    }
-
-    .section.active {
-      display: block;
-    }
+    .section { display: none; }
+    .section.active { display: block; }
 
     .cards-row {
       display: grid;
@@ -164,18 +160,6 @@
       color: #e5e7eb;
     }
 
-    .card p {
-      font-size: 0.85rem;
-      color: #9ca3af;
-      margin-bottom: 0.8rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-    }
-
     .form-group {
       display: flex;
       flex-direction: column;
@@ -183,12 +167,7 @@
       font-size: 0.85rem;
     }
 
-    .form-group label {
-      color: #e5e7eb;
-    }
-
-    .form-group input,
-    .form-group select {
+    .form-group input {
       background: #020617;
       border-radius: 0.5rem;
       border: 1px solid rgba(148, 163, 184, 0.5);
@@ -227,10 +206,7 @@
       cursor: pointer;
     }
 
-    .table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-    }
+    .table-wrapper { width: 100%; overflow-x: auto; }
 
     table {
       width: 100%;
@@ -254,73 +230,16 @@
       z-index: 1;
     }
 
-    tr:nth-child(even) {
-      background: rgba(15,23,42,0.7);
-    }
-
-    tr:hover {
-      background: rgba(30,64,175,0.35);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      font-size: 0.7rem;
-    }
-
-    .badge-role-admin {
-      background: rgba(59,130,246,0.2);
-      color: #bfdbfe;
-    }
-
-    .badge-role-editor {
-      background: rgba(52,211,153,0.2);
-      color: #bbf7d0;
-    }
-
-    .badge-role-user {
-      background: rgba(148,163,184,0.2);
-      color: #e5e7eb;
-    }
-
-    .badge-ban-true {
-      background: rgba(248,113,113,0.2);
-      color: #fecaca;
-    }
-
-    .badge-ban-false {
-      background: rgba(34,197,94,0.2);
-      color: #bbf7d0;
-    }
-
-    .uid-text {
-      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.7rem;
-      color: #9ca3af;
-    }
-
-    .link-button {
-      font-size: 0.8rem;
-      color: #60a5fa;
-      cursor: pointer;
-      text-decoration: underline;
-      background: none;
-      border: none;
-      padding: 0;
-    }
+    tr:nth-child(even) { background: rgba(15,23,42,0.7); }
+    tr:hover { background: rgba(30,64,175,0.35); }
 
     @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-      .admin-main {
-        flex: 1;
-      }
+      .sidebar { display: none; }
+      .admin-main { flex: 1; }
     }
   </style>
 </head>
+
 <body>
 
 <script type="module">
@@ -358,12 +277,9 @@
   let currentUser = null;
   let currentUserRole = "user";
 
-  // Basit toast
-  function toast(msg) {
-    alert(msg);
-  }
+  function toast(msg) { alert(msg); }
 
-  // Sidebar section switch
+  // ---------------- SECTION SWITCH ----------------
   window.switchSection = function (id) {
     document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
     document.getElementById(id).classList.add("active");
@@ -381,15 +297,19 @@
       "profile": "Profilim"
     };
     document.getElementById("topbarTitle").innerText = titleMap[id] || "Admin Paneli";
+
+    if (id === "comments") loadCommentsAdmin();
+    if (id === "settings") loadSettings();
   };
 
-  // Çıkış
+  // ---------------- LOGOUT ----------------
   window.logout = function () {
     signOut(auth).then(() => {
       window.location.href = "login.html";
     });
   };
 
+  // ---------------- AUTH CHECK ----------------
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = "login.html";
@@ -432,6 +352,7 @@
     switchSection("dashboard");
   });
 
+  // ---------------- DASHBOARD ----------------
   async function loadDashboardStats() {
     const usersSnap = await getDocs(collection(db, "users"));
     const booksSnap = await getDocs(collection(db, "books"));
@@ -456,7 +377,7 @@
     document.getElementById("statTotalBooks").innerText = booksSnap.size;
   }
 
-  // Kullanıcı oluşturma (sadece Firestore tarafı; Auth için backend gerekir)
+  // ---------------- USERS ----------------
   window.createUserRecord = async function (e) {
     e.preventDefault();
 
@@ -476,7 +397,7 @@
       createdAt: Date.now()
     });
 
-    toast("Kullanıcı kaydı Firestore'a eklendi. (Auth için backend gerekir)");
+    toast("Kullanıcı kaydı Firestore'a eklendi.");
     document.getElementById("newUserForm").reset();
     loadUsers();
   };
@@ -508,7 +429,7 @@
         <td><span class="badge ${roleClass}">${u.role || "user"}</span></td>
         <td><span class="badge ${bannedClass}">${u.banned ? "Banlı" : "Aktif"}</span></td>
         <td>${createdAt}</td>
-        <td><span class="uid-text">${docItem.id}</span></td>
+        <td>${docItem.id}</td>
         <td>
           <button class="btn-secondary" onclick="changeUserRole('${docItem.id}')">Rol Değiştir</button>
           <button class="btn-secondary" onclick="toggleBanUser('${docItem.id}')">${u.banned ? "Banı Kaldır" : "Banla"}</button>
@@ -547,14 +468,14 @@
     loadUsers();
   };
 
-  // Sadece Firestore kaydını siliyoruz; Auth tarafı için backend gerekir
   window.deleteUserRecord = async function (uid) {
     if (!confirm("Bu kullanıcı kaydını silmek istediğinize emin misiniz?")) return;
     await deleteDoc(doc(db, "users", uid));
-    toast("Kullanıcı kaydı Firestore'dan silindi. (Auth için backend gerekir)");
+    toast("Kullanıcı kaydı silindi.");
     loadUsers();
   };
 
+  // ---------------- CONTENT ----------------
   async function loadContentList() {
     const list = document.getElementById("contentList");
     list.innerHTML = "<p>İçerikler yükleniyor...</p>";
@@ -573,164 +494,4 @@
           Tarih: ${b.createdAt ? new Date(b.createdAt).toLocaleDateString() : "-"}
         </p>
         <button class="btn-secondary" onclick="window.open('book.html?id=${docItem.id}', '_blank')">Görüntüle</button>
-        <button class="btn-secondary" onclick="window.open('editor.html', '_blank')">Editor Panelinde Düzenle</button>
-      `;
-      list.appendChild(div);
-    });
-
-    if (!list.innerHTML.trim()) {
-      list.innerHTML = "<p>Henüz içerik eklenmemiş.</p>";
-    }
-  }
-</script>
-
-<div class="admin-layout">
-  <aside class="sidebar">
-    <div class="logo">Admin Paneli</div>
-    <div class="sidebar-nav">
-      <button data-section="dashboard" onclick="switchSection('dashboard')" class="active">Dashboard</button>
-      <button data-section="users" onclick="switchSection('users')">Kullanıcı Yönetimi</button>
-      <button data-section="content" onclick="switchSection('content')">İçerik Yönetimi</button>
-      <button data-section="comments" onclick="switchSection('comments')">Yorum Yönetimi</button>
-      <button data-section="settings" onclick="switchSection('settings')">Site Ayarları</button>
-      <button data-section="profile" onclick="switchSection('profile')">Profilim</button>
-      <button onclick="logout()">Çıkış</button>
-    </div>
-    <div class="sidebar-footer">
-      <div>Giriş yapan: <span id="adminEmail"></span></div>
-    </div>
-  </aside>
-
-  <div class="admin-main">
-    <div class="admin-topbar">
-      <div class="admin-topbar-title" id="topbarTitle">Yönetim Paneli</div>
-      <div class="admin-topbar-right">
-        <span>Admin</span>
-        <button onclick="logout()">Çıkış</button>
-      </div>
-    </div>
-
-    <div class="admin-content">
-      <!-- DASHBOARD -->
-      <section id="dashboard" class="section active">
-        <div class="cards-row">
-          <div class="stat-card">
-            <div class="stat-label">Toplam Kullanıcı</div>
-            <div class="stat-value" id="statTotalUsers">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Editor Sayısı</div>
-            <div class="stat-value" id="statTotalEditors">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Admin Sayısı</div>
-            <div class="stat-value" id="statTotalAdmins">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Banlı Kullanıcı</div>
-            <div class="stat-value" id="statTotalBanned">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Toplam İçerik</div>
-            <div class="stat-value" id="statTotalBooks">0</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Hızlı Erişim</h3>
-          <button class="btn-secondary" onclick="switchSection('users')">Kullanıcı Yönetimine Git</button>
-          <button class="btn-secondary" onclick="switchSection('content')">İçerik Yönetimine Git</button>
-          <button class="btn-secondary" onclick="window.open('editor.html', '_blank')">Yeni İçerik Ekle</button>
-        </div>
-      </section>
-
-      <!-- USERS -->
-      <section id="users" class="section">
-        <div class="card">
-          <h3>Yeni Kullanıcı Oluştur</h3>
-          <p>Not: Buradan sadece Firestore kullanıcı kaydı oluşturulur. Authentication tarafı için backend (Cloud Functions) gerekir.</p>
-          <form id="newUserForm" onsubmit="createUserRecord(event)">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="newUserEmail" required />
-              </div>
-              <div class="form-group">
-                <label>Rol</label>
-                <select id="newUserRole" required>
-                  <option value="user">User</option>
-                  <option value="editor">Editor</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>UID (Auth tarafındaki kullanıcı ID'si)</label>
-                <input type="text" id="newUserUid" placeholder="Auth UID" required />
-              </div>
-            </div>
-            <div style="margin-top:0.8rem;">
-              <button type="submit" class="btn-primary">Kullanıcı Oluştur</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
-          <h3>Kullanıcı Listesi</h3>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Rol</th>
-                  <th>Ban</th>
-                  <th>Kayıt Tarihi</th>
-                  <th>UID</th>
-                  <th>İşlemler</th>
-                </tr>
-              </thead>
-              <tbody id="usersTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- CONTENT -->
-      <section id="content" class="section">
-        <div class="card">
-          <h3>İçerik Yönetimi</h3>
-          <p>Buradan mevcut içerikleri görebilir, detay sayfasını açabilir veya editor panelinde düzenleyebilirsin.</p>
-          <button class="btn-primary" onclick="window.open('editor.html', '_blank')">Yeni İçerik Ekle</button>
-        </div>
-        <div id="contentList"></div>
-      </section>
-
-      <!-- COMMENTS -->
-      <section id="comments" class="section">
-        <div class="card">
-          <h3>Yorum Yönetimi</h3>
-          <p>Şu an için yorumlar book.html üzerinden listeleniyor. İstersen buraya da merkezi bir yorum yönetim sistemi ekleyebiliriz.</p>
-        </div>
-      </section>
-
-      <!-- SETTINGS -->
-      <section id="settings" class="section">
-        <div class="card">
-          <h3>Site Ayarları</h3>
-          <p>Logo, renk teması, meta açıklamaları gibi ayarları buraya ekleyebiliriz. Şimdilik placeholder olarak duruyor.</p>
-        </div>
-      </section>
-
-      <!-- PROFILE -->
-      <section id="profile" class="section">
-        <div class="card">
-          <h3>Profilim</h3>
-          <p>Giriş yapan: <span id="adminEmail"></span></p>
-          <button class="btn-secondary" onclick="logout()">Çıkış Yap</button>
-        </div>
-      </section>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
+        <button class="btn-secondary"
