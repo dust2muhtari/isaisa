@@ -142,11 +142,12 @@
 </head>
 <body>
 
-<!-- ÜST MENÜ (senin orijinal header yapın) -->
+<!-- ÜST MENÜ -->
 <header class="site-header">
   <div class="logo">İsa Halis</div>
   <nav class="nav" id="nav-menu"></nav>
 </header>
+
 <section class="hero">
   <div class="hero-content">
     <h1>İsa Halis</h1>
@@ -156,6 +157,7 @@
     </p>
   </div>
 </section>
+
 <!-- HERKUL TARZI ALT MENÜ -->
 <div class="sub-nav">
   <div class="sub-left">
@@ -235,8 +237,11 @@
 
       nav.innerHTML += `<a href="profile.html">Profilim</a>`;
 
-      if (role === "editor") {
+      if (role === "editor" || role === "admin") {
         nav.innerHTML += `<a href="editor.html">Editor Paneli</a>`;
+      }
+
+      if (role === "admin") {
         nav.innerHTML += `<a href="admin.html">Admin Paneli</a>`;
       }
 
