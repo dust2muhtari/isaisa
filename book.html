@@ -2,75 +2,49 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Kitap Detayı</title>
+  <title>İçerik</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
-  <style>
-    .stars { font-size: 22px; cursor: pointer; color: #ccc; }
-    .stars.selected { color: gold; }
-    .comment-stars { color: gold; font-size: 18px; }
-  </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="logo">M. Furkan</div>
-  <nav class="nav">
-    <a href="index.html">Ana Sayfa</a>
-    <a href="books.html">Kitaplarım</a>
-    <a href="about.html">Hakkımda</a>
-    <a href="contact.html">İletişim</a>
-  </nav>
-</header>
+<style>
+  body { display: none; }
 
-<main class="section">
-  <div id="book-content">
-    <h1 id="book-title">Yükleniyor...</h1>
-    <img id="book-cover" style="width:200px;border-radius:8px;margin:20px 0;">
-    <p id="book-desc"></p>
+  .content-wrapper {
+    max-width: var(--max-width);
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+  }
 
-    <h3>Ortalama Puan</h3>
-    <p id="avg-rating">Hesaplanıyor...</p>
+  .book-cover {
+    width: 100%;
+    max-height: 360px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-soft);
+  }
 
-    <hr style="margin:2rem 0;opacity:0.3;">
-    <h3>Kitap Tam Metni</h3>
-    <p id="book-full"></p>
-  </div>
+  .book-meta {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
 
-  <hr style="margin:2rem 0;opacity:0.3;">
+  .book-desc {
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
 
-  <h3>Yorumlar</h3>
-  <div id="comment-list">Yorumlar yükleniyor...</div>
-
-  <div id="comment-box" style="margin-top:20px;">
-    <h4>Yorum Yaz</h4>
-
-    <p id="comment-login-warning" style="color:red;display:none;">
-      Yorum yazmak için giriş yapmanız gerekiyor.
-      <a href="login.html">Giriş Yap</a>
-    </p>
-
-    <form id="comment-form" onsubmit="submitComment(event)" style="display:none;">
-      <input type="text" id="comment-name" placeholder="Adınız" required />
-
-      <label>Puanınız:</label>
-      <div id="rating-stars">
-        <span class="stars" data-value="1">★</span>
-        <span class="stars" data-value="2">★</span>
-        <span class="stars" data-value="3">★</span>
-        <span class="stars" data-value="4">★</span>
-        <span class="stars" data-value="5">★</span>
-      </div>
-
-      <textarea id="comment-text" placeholder="Yorumunuz" rows="3" required></textarea>
-      <button type="submit" class="btn-primary">Gönder</button>
-    </form>
-  </div>
-</main>
-
-<footer class="site-footer">
-  <p>© <span id="year"></span> M. Furkan</p>
-</footer>
+  .book-full {
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-line;
+    font-size: 1rem;
+  }
+</style>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -82,10 +56,7 @@
   import {
     getFirestore,
     doc,
-    getDoc,
-    collection,
-    getDocs,
-    addDoc
+    getDoc
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -102,111 +73,67 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let currentUser = null;
-  let selectedRating = 0;
-
+  // URL'den ID alma
   const params = new URLSearchParams(window.location.search);
-  const bookId = params.get("id");
+  const bookID = params.get("id");
 
+  if (!bookID) {
+    document.body.innerHTML = "<p style='padding:2rem;'>Geçersiz içerik ID.</p>";
+  }
+
+  // İçeriği yükleme
   async function loadBook() {
-    const ref = doc(db, "books", bookId);
+    const ref = doc(db, "books", bookID);
     const snap = await getDoc(ref);
 
-    if (!snap.exists()) return;
+    if (!snap.exists()) {
+      document.body.innerHTML = "<p style='padding:2rem;'>İçerik bulunamadı.</p>";
+      return;
+    }
 
     const b = snap.data();
 
-    document.getElementById("book-title").textContent = b.title;
-    document.getElementById("book-cover").src = b.cover;
-    document.getElementById("book-desc").textContent = b.desc;
-    document.getElementById("book-full").textContent = b.fullText;
+    document.getElementById("bookTitle").innerText = b.title;
+    document.getElementById("bookCover").src = b.cover || "assets/placeholder.jpg";
+    document.getElementById("bookDesc").innerText = b.desc || "";
+    document.getElementById("bookFull").innerText = b.fullText || "";
+    document.getElementById("bookMeta").innerText =
+      `${new Date(b.createdAt).toLocaleDateString()} • ${b.category}`;
+    
+    document.body.style.display = "block";
   }
 
   loadBook();
+</script>
 
-  async function loadComments() {
-    const list = document.getElementById("comment-list");
-    list.innerHTML = "";
+<header class="site-header">
+  <div class="logo">İsa Halis</div>
+  <nav class="nav">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="books.html">Kitaplarım</a>
+    <a href="about.html">Hakkımda</a>
+    <a href="contact.html">İletişim</a>
+  </nav>
+</header>
 
-    const snap = await getDocs(collection(db, "books", bookId, "comments"));
+<main class="content-wrapper">
+  <img id="bookCover" class="book-cover" />
 
-    let totalRating = 0;
-    let count = 0;
+  <h1 id="bookTitle"></h1>
 
-    snap.forEach((c) => {
-      const data = c.data();
+  <div id="bookMeta" class="book-meta"></div>
 
-      totalRating += data.rating || 0;
-      count++;
+  <div id="bookDesc" class="book-desc"></div>
 
-      const div = document.createElement("div");
-      div.className = "comment-item";
-      div.innerHTML = `
-        <strong>${data.name}</strong>
-        <span class="comment-stars">${"★".repeat(data.rating || 0)}</span>
-        <p>${data.text}</p>
-        <small>${new Date(data.createdAt).toLocaleString()}</small>
-        <hr style="opacity:0.2;">
-      `;
-      list.appendChild(div);
-    });
+  <div id="bookFull" class="book-full"></div>
+</main>
 
-    if (count === 0) {
-      document.getElementById("avg-rating").textContent = "Henüz puanlama yok.";
-    } else {
-      const avg = (totalRating / count).toFixed(1);
-      document.getElementById("avg-rating").textContent = `${avg} / 5 ★`;
-    }
-  }
+<footer class="site-footer">
+  <p>© <span id="year"></span> İsa Halis</p>
+</footer>
 
-  loadComments();
-
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-
-    if (user) {
-      document.getElementById("comment-form").style.display = "block";
-      document.getElementById("comment-login-warning").style.display = "none";
-      document.getElementById("comment-name").value = user.email.split("@")[0];
-    } else {
-      document.getElementById("comment-form").style.display = "none";
-      document.getElementById("comment-login-warning").style.display = "block";
-    }
-  });
-
-  document.querySelectorAll(".stars").forEach(star => {
-    star.addEventListener("click", () => {
-      selectedRating = parseInt(star.dataset.value);
-
-      document.querySelectorAll(".stars").forEach(s => s.classList.remove("selected"));
-      for (let i = 0; i < selectedRating; i++) {
-        document.querySelectorAll(".stars")[i].classList.add("selected");
-      }
-    });
-  });
-
-  window.submitComment = async function (e) {
-    e.preventDefault();
-
-    if (!currentUser || selectedRating === 0) return;
-
-    const name = document.getElementById("comment-name").value;
-    const text = document.getElementById("comment-text").value;
-
-    await addDoc(collection(db, "books", bookId, "comments"), {
-      name,
-      text,
-      rating: selectedRating,
-      userId: currentUser.uid,
-      createdAt: Date.now()
-    });
-
-    document.getElementById("comment-form").reset();
-    selectedRating = 0;
-    document.querySelectorAll(".stars").forEach(s => s.classList.remove("selected"));
-
-    loadComments();
-  };
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 
 </body>
