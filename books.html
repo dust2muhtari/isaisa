@@ -2,14 +2,14 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Kitaplarım | M. Furkan</title>
+  <title>Kitaplarım | İsa Halis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
 
 <header class="site-header">
-  <div class="logo">M. Furkan</div>
+  <div class="logo">İsa Halis</div>
   <nav class="nav">
     <a href="index.html">Ana Sayfa</a>
     <a href="books.html">Kitaplarım</a>
@@ -39,15 +39,13 @@
 </main>
 
 <footer class="site-footer">
-  <p>© <span id="year"></span> M. Furkan</p>
+  <p>© <span id="year"></span> İsa Halis</p>
 </footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
   import {
-    getFirestore,
-    collection,
-    getDocs
+    getFirestore, collection, getDocs
   } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -56,8 +54,7 @@
     projectId: "isahalis",
     storageBucket: "isahalis.firebasestorage.app",
     messagingSenderId: "33060832531",
-    appId: "1:33060832531:web:31cdc1598686be16aa06e6",
-    measurementId: "G-2N25T885EH"
+    appId: "1:33060832531:web:31cdc1598686be16aa06e6"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -74,17 +71,13 @@
 
     for (const docItem of snap.docs) {
       const book = docItem.data();
-      const commentsSnap = await getDocs(collection(db, "books", docItem.id, "comments"));
 
-      let total = 0;
-      let count = 0;
+      const ratingsSnap = await getDocs(collection(db, "books", docItem.id, "ratings"));
 
-      commentsSnap.forEach(c => {
-        total += c.data().rating || 0;
-        count++;
-      });
+      let total = 0, count = 0;
+      ratingsSnap.forEach(r => { total += r.data().rating; count++; });
 
-      const avg = count === 0 ? "Henüz puan yok" : (total / count).toFixed(1) + " ★";
+      const avg = count === 0 ? "Henüz yok" : (total / count).toFixed(1) + " ★";
 
       allBooks.push({
         id: docItem.id,
@@ -128,6 +121,8 @@
   });
 
   loadBooks();
+
+  document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 
 </body>
